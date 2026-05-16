@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Ciudadano {
+  id        String    @id @default(cuid())
+  nombre    String
+  telefono  String    @unique
+  createdAt DateTime  @default(now())
+  reportes  Reporte[]
+}
+
+model Reporte {
+  id               String              @id @default(cuid())
+  clientRequestId  String              @unique
+  folio            String              @unique
+  tipo             String
+  descripcion      String
+  referencia       String
+  colonia          String
+  direccion        String
+  lat              Float?
+  lng              Float?
+  estatus          String              @default("recibido")
+  dependencia      String              @default("Sin asignar")
+  ciudadanoId      String
+  ciudadano        Ciudadano           @relation(fields: [ciudadanoId], references: [id])
+  ciudadanoNombre  String
+  fotoUrl          String?
+  createdAt        DateTime            @default(now())
+  historial        HistorialEstatus[]
+  evaluacion       Evaluacion?
+}
+
+model HistorialEstatus {
+  id          String   @id @default(cuid())
+  reporteId   String
+  reporte     Reporte  @relation(fields: [reporteId], references: [id], onDelete: Cascade)
+  estatus     String
+  nota        String
+  dependencia String?
+  createdAt   DateTime @default(now())
+}
+
+model Evaluacion {
+  id         String   @id @default(cuid())
+  reporteId  String   @unique
+  reporte    Reporte  @relation(fields: [reporteId], references: [id], onDelete: Cascade)
+  estrellas  Int
+  comentario String   @default("")
+  createdAt  DateTime @default(now())
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  telefono  String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
