@@ -49,7 +49,7 @@ interface Props {
 
 export default function LocationMapInner({ center, position, flyTarget, onChange }: Props) {
   return (
-    <div className="overflow-hidden rounded border border-input-border">
+    <div className="isolate overflow-hidden rounded border border-input-border">
       <MapContainer
         center={center}
         zoom={15}

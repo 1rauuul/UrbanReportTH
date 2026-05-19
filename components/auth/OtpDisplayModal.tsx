@@ -36,7 +36,7 @@ export default function OtpDisplayModal({
   return (
     <dialog
       ref={dialogRef}
-      className="rounded-md border border-border bg-surface p-0 shadow-xl backdrop:bg-black/50"
+      className="m-auto rounded-md border border-border bg-surface p-0 shadow-xl backdrop:bg-black/50"
       onClose={onClose}
     >
       <div className="flex w-80 flex-col gap-5 p-6">
@@ -44,7 +44,7 @@ export default function OtpDisplayModal({
           <p className="text-xs font-semibold uppercase tracking-widest text-muted">
             Código de verificación
           </p>
-          <p className="mt-3 font-mono text-4xl font-bold tracking-widest text-primary">
+          <p className="mt-3 font-mono text-2xl font-bold tracking-[0.3em] text-primary">
             {digitos}
           </p>
         </div>

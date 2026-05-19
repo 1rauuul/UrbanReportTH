@@ -129,9 +129,12 @@ export default function LoginPage() {
                   label="Número de celular"
                   fieldVariant="soft"
                   type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={10}
                   placeholder="222 123 4567"
                   value={telefono}
-                  onChange={(e) => setTelefono(e.target.value)}
+                  onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))}
                   error={error}
                 />
                 <Button fullWidth onClick={handleSolicitarOtp} disabled={cargando}>

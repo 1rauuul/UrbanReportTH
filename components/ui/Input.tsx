@@ -27,7 +27,7 @@ export function Input({
           <label
             htmlFor={inputId}
             className={[
-              "pointer-events-none absolute left-3 top-0 z-10 -translate-y-1/2 px-1 text-xs font-medium",
+              "pointer-events-none absolute left-3 top-0 z-[1] -translate-y-1/2 px-1 text-xs font-medium",
               error ? "text-danger" : "text-muted",
               bgSoft,
             ].join(" ")}
@@ -80,7 +80,7 @@ export function Textarea({
           <label
             htmlFor={inputId}
             className={[
-              "pointer-events-none absolute left-3 top-0 z-10 -translate-y-1/2 px-1 text-xs font-medium",
+              "pointer-events-none absolute left-3 top-0 z-[1] -translate-y-1/2 px-1 text-xs font-medium",
               error ? "text-danger" : "text-muted",
               bgSoft,
             ].join(" ")}
