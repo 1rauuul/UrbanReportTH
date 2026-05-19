@@ -1,8 +1,7 @@
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { randomUUID } from "crypto";
+import { supabaseAdmin } from "./supabase";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
+const BUCKET = "reportes";
 
 export async function saveUpload(file: File): Promise<string> {
   const bytes = await file.arrayBuffer();
@@ -11,9 +10,22 @@ export async function saveUpload(file: File): Promise<string> {
     throw new Error("La imagen supera 5 MB");
   }
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
   const ext = file.type.includes("png") ? "png" : "jpg";
   const name = `${randomUUID()}.${ext}`;
-  await writeFile(path.join(UPLOAD_DIR, name), buffer);
-  return `/uploads/${name}`;
+
+  const { error } = await supabaseAdmin.storage
+    .from(BUCKET)
+    .upload(name, buffer, {
+      contentType: file.type,
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) throw new Error(`Error al subir imagen: ${error.message}`);
+
+  const { data: urlData } = supabaseAdmin.storage
+    .from(BUCKET)
+    .getPublicUrl(name);
+
+  return urlData.publicUrl;
 }
