@@ -1,17 +1,22 @@
-export type Estatus =
-  | "recibido"
-  | "en_revision"
-  | "asignado"
+export type EstatusReporte =
+  | "creado"
+  | "asignado_a_dependencia"
+  | "asignado_a_jefe_cuadrilla"
   | "en_proceso"
-  | "resuelto"
-  | "cerrado";
+  | "solucionado_por_cuadrilla"
+  | "pendiente_revision_ciudadana"
+  | "reabierto_por_ciudadano"
+  | "cerrado"
+  | "cerrado_administrativamente";
+
+/** Alias para compatibilidad con código legacy */
+export type Estatus = EstatusReporte;
 
 export type TipoIncidencia =
   | "bache"
   | "basura"
   | "fuga"
-  | "luminaria"
-  | "otro";
+  | "alumbrado";
 
 export type SyncStatus =
   | "synced"
@@ -27,8 +32,9 @@ export interface Reporte {
   referencia: string;
   colonia: string;
   direccion: string;
-  estatus: Estatus;
+  estatus: EstatusReporte;
   dependencia: string;
+  dependenciaId?: string | null;
   fecha: string;
   ciudadano: string;
   lat?: number | null;
@@ -37,13 +43,15 @@ export interface Reporte {
   syncStatus?: SyncStatus;
   clientRequestId?: string;
   lastError?: string;
+  jefeCuadrillaId?: string | null;
 }
 
 export interface HistorialEstatus {
-  estatus: Estatus;
+  estatus: EstatusReporte;
   fecha: string;
   nota: string;
   dependencia?: string;
+  actor?: string;
 }
 
 export const TIPOS_INCIDENCIA: {
@@ -51,20 +59,22 @@ export const TIPOS_INCIDENCIA: {
   label: string;
   icon: string;
 }[] = [
-  { id: "bache", label: "Bache", icon: "🕳️" },
-  { id: "basura", label: "Basura", icon: "🗑️" },
-  { id: "fuga", label: "Fuga de agua", icon: "💧" },
-  { id: "luminaria", label: "Luminaria", icon: "💡" },
-  { id: "otro", label: "Otro", icon: "📋" },
+  { id: "bache", label: "Bache", icon: "road" },
+  { id: "basura", label: "Basura", icon: "trash" },
+  { id: "fuga", label: "Fuga de agua", icon: "droplet" },
+  { id: "alumbrado", label: "Alumbrado", icon: "zap" },
 ];
 
-export const ESTATUS_LABELS: Record<Estatus, string> = {
-  recibido: "Recibido",
-  en_revision: "En revisión",
-  asignado: "Canalizado",
+export const ESTATUS_LABELS: Record<EstatusReporte, string> = {
+  creado: "Recibido",
+  asignado_a_dependencia: "Asignado",
+  asignado_a_jefe_cuadrilla: "En cuadrilla",
   en_proceso: "En proceso",
-  resuelto: "Resuelto",
+  solucionado_por_cuadrilla: "Solucionado",
+  pendiente_revision_ciudadana: "Pendiente tu revisión",
+  reabierto_por_ciudadano: "Reabierto",
   cerrado: "Cerrado",
+  cerrado_administrativamente: "Cerrado (admin)",
 };
 
 export const SYNC_STATUS_LABELS: Record<SyncStatus, string> = {
@@ -75,11 +85,18 @@ export const SYNC_STATUS_LABELS: Record<SyncStatus, string> = {
 };
 
 export const DEPENDENCIAS = [
-  "Obras Públicas",
-  "Servicios Públicos",
-  "Alumbrado Público",
+  "Obra Pública",
+  "OOSAPAT",
+  "OOSELITE",
   "Protección Civil",
 ];
+
+export const DEPENDENCIAS_SLUGS: Record<string, string> = {
+  "obra-publica": "Obra Pública",
+  "oosapat": "OOSAPAT",
+  "ooselite": "OOSELITE",
+  "proteccion-civil": "Protección Civil",
+};
 
 export const REPORTES_MOCK: Reporte[] = [
   {
@@ -90,8 +107,8 @@ export const REPORTES_MOCK: Reporte[] = [
     referencia: "Frente a la farmacia Guadalajara",
     colonia: "Centro",
     direccion: "Av. Reforma #120",
-    estatus: "recibido",
-    dependencia: "Sin asignar",
+    estatus: "asignado_a_dependencia",
+    dependencia: "Obra Pública",
     fecha: "2026-05-12",
     ciudadano: "María López",
   },
@@ -104,20 +121,20 @@ export const REPORTES_MOCK: Reporte[] = [
     colonia: "San Sebastián",
     direccion: "Calle 5 de Mayo #45",
     estatus: "en_proceso",
-    dependencia: "Servicios Públicos",
+    dependencia: "OOSELITE",
     fecha: "2026-05-10",
     ciudadano: "Carlos Ruiz",
   },
   {
     id: "3",
     folio: "THC-2026-00031",
-    tipo: "luminaria",
+    tipo: "alumbrado",
     descripcion: "Luminaria apagada desde hace una semana.",
     referencia: "Parque Juárez, entrada principal",
     colonia: "La Huizachera",
     direccion: "Blvd. Miguel Hidalgo",
-    estatus: "resuelto",
-    dependencia: "Alumbrado Público",
+    estatus: "cerrado",
+    dependencia: "Obra Pública",
     fecha: "2026-05-05",
     ciudadano: "Ana García",
   },
@@ -129,63 +146,9 @@ export const REPORTES_MOCK: Reporte[] = [
     referencia: "Esquina con Av. Independencia",
     colonia: "Centro",
     direccion: "Calle 3 Sur #88",
-    estatus: "asignado",
-    dependencia: "Servicios Públicos",
+    estatus: "asignado_a_jefe_cuadrilla",
+    dependencia: "OOSAPAT",
     fecha: "2026-05-08",
     ciudadano: "Pedro Méndez",
   },
 ];
-
-export const HISTORIAL_MOCK: Record<string, HistorialEstatus[]> = {
-  "1": [
-    {
-      estatus: "recibido",
-      fecha: "2026-05-12 09:15",
-      nota: "Reporte recibido correctamente.",
-    },
-  ],
-  "2": [
-    {
-      estatus: "recibido",
-      fecha: "2026-05-10 14:30",
-      nota: "Reporte recibido.",
-    },
-    {
-      estatus: "asignado",
-      fecha: "2026-05-10 16:00",
-      nota: "Canalizado a Servicios Públicos.",
-      dependencia: "Servicios Públicos",
-    },
-    {
-      estatus: "en_proceso",
-      fecha: "2026-05-11 08:45",
-      nota: "Cuadrilla en camino.",
-      dependencia: "Servicios Públicos",
-    },
-  ],
-  "3": [
-    {
-      estatus: "recibido",
-      fecha: "2026-05-05 10:00",
-      nota: "Reporte recibido.",
-    },
-    {
-      estatus: "asignado",
-      fecha: "2026-05-05 11:30",
-      nota: "Asignado a Alumbrado Público.",
-      dependencia: "Alumbrado Público",
-    },
-    {
-      estatus: "en_proceso",
-      fecha: "2026-05-06 09:00",
-      nota: "Técnico en sitio.",
-      dependencia: "Alumbrado Público",
-    },
-    {
-      estatus: "resuelto",
-      fecha: "2026-05-07 15:20",
-      nota: "Luminaria reemplazada.",
-      dependencia: "Alumbrado Público",
-    },
-  ],
-};

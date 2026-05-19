@@ -15,46 +15,28 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex flex-1 flex-col px-4 py-8 sm:px-8">
-        <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+      <main className="flex flex-1 flex-col px-4 py-10 sm:px-8">
+        <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
           <Card variant="panel" padding="lg">
-            <h2 className="text-lg font-semibold text-primary sm:text-xl">
-              UrbaReport Tehuacán — Incidencias urbanas
+            <h2 className="text-xl font-bold text-primary sm:text-2xl">
+              UrbaReport Tehuacán
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
-              Canal oficial para registrar hallazgos en vía pública y dar seguimiento al estatus de su
-              atención por las dependencias municipales competentes.
+            <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">
+              Canal oficial para reportar incidencias en vía pública y dar seguimiento a su atención.
             </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <Link href="/login" className="sm:min-w-[200px]">
-                <Button variant="primary" fullWidth className="text-sm sm:text-base">
-                  Acceso ciudadanos
+
+            <div className="mt-6 flex flex-col gap-3">
+              <Link href="/login">
+                <Button variant="primary" fullWidth>
+                  Acceso ciudadano
                 </Button>
               </Link>
-              <Link href="/gobierno/dashboard" className="sm:min-w-[200px]">
-                <Button variant="secondary" fullWidth className="text-sm sm:text-base">
-                  Mesa de control (gobierno)
+              <Link href="/staff/login">
+                <Button variant="secondary" fullWidth>
+                  Acceso institucional (gobierno / dependencia)
                 </Button>
               </Link>
             </div>
-          </Card>
-
-          <Card variant="default" padding="lg" className="max-w-4xl">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-primary">
-              Trámites y enlaces
-            </h3>
-            <p className="mt-2 text-sm text-muted">
-              Personal de dependencias municipales puede consultar la bandeja de reportes asignados.
-            </p>
-            <p className="mt-4 text-sm text-muted">
-              ¿Dependencia operativa?{" "}
-              <Link
-                href="/dependencia/dashboard"
-                className="font-semibold text-primary underline decoration-1 underline-offset-2 hover:text-primary-dark"
-              >
-                Acceso dependencias
-              </Link>
-            </p>
           </Card>
         </div>
       </main>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/ui/Card";
-import { useAppStore } from "@/lib/store";
 
 interface MetricasData {
   total: number;
@@ -16,15 +15,30 @@ interface MetricasData {
 }
 
 export default function MetricasPage() {
-  const dependenciaActiva = useAppStore((s) => s.dependenciaActiva);
+  const [dependenciaNombre, setDependenciaNombre] = useState<string>("");
+  const [dependenciaId, setDependenciaId] = useState<string>("");
   const [data, setData] = useState<MetricasData | null>(null);
 
   useEffect(() => {
-    void fetch(`/api/metricas?dependencia=${encodeURIComponent(dependenciaActiva)}`)
+    async function cargar() {
+      try {
+        const me = await fetch("/api/auth/staff-me").then((r) => r.json());
+        setDependenciaNombre(me.dependenciaNombre ?? "");
+        setDependenciaId(me.dependenciaId ?? "");
+      } catch {
+        /* ignorar */
+      }
+    }
+    void cargar();
+  }, []);
+
+  useEffect(() => {
+    if (!dependenciaId) return;
+    void fetch(`/api/metricas?dependencia=${encodeURIComponent(dependenciaId)}`)
       .then((r) => r.json())
       .then(setData)
       .catch(console.error);
-  }, [dependenciaActiva]);
+  }, [dependenciaId]);
 
   const kpis = data
     ? [
@@ -47,7 +61,7 @@ export default function MetricasPage() {
     <section className="p-4 md:p-8">
       <header className="mb-6">
         <h2 className="text-2xl font-extrabold">Métricas</h2>
-        <p className="text-base text-muted">{dependenciaActiva}</p>
+        <p className="text-base text-muted">{dependenciaNombre}</p>
       </header>
 
       {!data ? (

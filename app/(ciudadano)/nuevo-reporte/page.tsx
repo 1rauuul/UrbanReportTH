@@ -10,7 +10,8 @@ import { Input, Textarea } from "@/components/ui/Input";
 import LocationMap, { type MapLocation } from "@/components/ui/LocationMap";
 import PhotoUpload from "@/components/ui/PhotoUpload";
 import SyncStatusBanner from "@/components/ui/SyncStatusBanner";
-import { TIPOS_INCIDENCIA, TipoIncidencia } from "@/lib/mock-data";
+import IncidenciaIcon from "@/components/ui/IncidenciaIcon";
+import { TIPOS_INCIDENCIA, type TipoIncidencia } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { createReporteApi } from "@/lib/api/client";
@@ -94,18 +95,18 @@ export default function NuevoReportePage() {
   }
 
   const panelTitles = [
-    "Datos del tipo de incidencia.",
-    "Datos para la descripción y ubicación del reporte.",
-    "Evidencia fotográfica (opcional).",
+    "Selecciona el tipo de incidencia.",
+    "Describe el problema y su ubicación.",
+    "Agrega evidencia fotográfica (opcional).",
   ];
 
   return (
     <>
-      <TopBar title="Reporte ciudadano" backHref="/mis-reportes" />
+      <TopBar title="Nuevo reporte" backHref="/mis-reportes" />
       <SyncStatusBanner />
       <FormStepper steps={STEPS} activeIndex={step} />
 
-      <section className="flex flex-col gap-4 p-4">
+      <section className="flex flex-col gap-4 p-4 pb-24">
         <Card variant="panel" padding="lg">
           <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
             <h2 className="text-base font-semibold leading-snug text-primary sm:text-lg">
@@ -128,15 +129,19 @@ export default function NuevoReportePage() {
                     type="button"
                     onClick={() => setTipo(t.id)}
                     className={[
-                      "flex flex-col items-center gap-2 rounded border p-4 transition-colors",
+                      "flex flex-col items-center gap-2 rounded-lg border p-4 transition-colors",
                       tipo === t.id
                         ? "border-primary bg-input-soft ring-1 ring-primary/30"
                         : "border-input-border bg-white hover:bg-input-soft/40",
                     ].join(" ")}
                   >
-                    <span className="text-3xl" aria-hidden="true">
-                      {t.icon}
-                    </span>
+                    <IncidenciaIcon
+                      icon={t.icon}
+                      className={[
+                        "h-8 w-8",
+                        tipo === t.id ? "text-primary" : "text-muted",
+                      ].join(" ")}
+                    />
                     <span className="text-center text-sm font-semibold">{t.label}</span>
                   </button>
                 ))}
@@ -173,7 +178,10 @@ export default function NuevoReportePage() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                   Ubicación en el mapa
                 </p>
-                <LocationMap value={ubicacion} onChange={setUbicacion} />
+                <LocationMap
+                  value={ubicacion}
+                  onChange={setUbicacion}
+                />
               </div>
               <div className="flex gap-3">
                 <Button variant="secondary" className="flex-1" onClick={() => setStep(0)}>

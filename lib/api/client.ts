@@ -1,5 +1,5 @@
-import type { Estatus, TipoIncidencia } from "@/lib/mock-data";
-import type { EvaluacionDTO, HistorialDTO, ReporteDTO } from "./types";
+import type { EstatusReporte, TipoIncidencia } from "@/lib/mock-data";
+import type { EvaluacionDTO, HistorialDTO, ReporteDTO, JefeCuadrillaDTO } from "./types";
 
 export async function fetchReportes(telefono: string): Promise<ReporteDTO[]> {
   const res = await fetch(`/api/reportes?telefono=${encodeURIComponent(telefono)}`);
@@ -59,23 +59,9 @@ export async function createReporteApi(
   return res.json();
 }
 
-export async function asignarDependenciaApi(
-  id: string,
-  dependencia: string,
-  nota: string
-): Promise<ReporteDTO> {
-  const res = await fetch(`/api/reportes/${id}/asignar`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dependencia, nota }),
-  });
-  if (!res.ok) throw new Error("Error al asignar dependencia");
-  return res.json();
-}
-
 export async function actualizarEstatusApi(
   id: string,
-  estatus: Estatus,
+  estatus: EstatusReporte,
   nota: string
 ): Promise<ReporteDTO> {
   const res = await fetch(`/api/reportes/${id}/estatus`, {
@@ -84,6 +70,82 @@ export async function actualizarEstatusApi(
     body: JSON.stringify({ estatus, nota }),
   });
   if (!res.ok) throw new Error("Error al actualizar estatus");
+  return res.json();
+}
+
+export async function asignarCuadrillaApi(
+  id: string,
+  jefeCuadrillaId: string,
+  nota: string
+): Promise<ReporteDTO> {
+  const res = await fetch(`/api/reportes/${id}/asignar-cuadrilla`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jefeCuadrillaId, nota }),
+  });
+  if (!res.ok) throw new Error("Error al asignar jefe de cuadrilla");
+  return res.json();
+}
+
+export async function avanceCuadrillaApi(
+  id: string,
+  estatus: "en_proceso" | "solucionado_por_cuadrilla",
+  nota: string
+): Promise<ReporteDTO> {
+  const res = await fetch(`/api/reportes/${id}/avance`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
+    body: JSON.stringify({ estatus, nota }),
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => ({}))) as { error?: string };
+    if (res.status === 403 && data.error === "No autorizado") {
+      throw new Error(
+        "Sesión no válida para cuadrilla. Cierra sesión e ingresa con la cuenta del jefe de cuadrilla asignado."
+      );
+    }
+    if (res.status === 403) {
+      throw new Error(
+        data.error ??
+          "Este reporte no está asignado a tu cuadrilla. Usa la cuenta del jefe que lo recibió."
+      );
+    }
+    throw new Error(data.error ?? "Error al actualizar avance");
+  }
+  return res.json();
+}
+
+export async function revisionCiudadanoApi(
+  id: string,
+  confirmar: boolean,
+  comentario: string
+): Promise<ReporteDTO> {
+  const res = await fetch(`/api/reportes/${id}/revision-ciudadano`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ confirmar, comentario }),
+  });
+  if (!res.ok) throw new Error("Error al enviar revisión");
+  return res.json();
+}
+
+export async function cierreAdminApi(
+  id: string,
+  nota: string
+): Promise<ReporteDTO> {
+  const res = await fetch(`/api/reportes/${id}/cierre-admin`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nota }),
+  });
+  if (!res.ok) throw new Error("Error al cerrar administrativamente");
+  return res.json();
+}
+
+export async function fetchJefesCuadrilla(): Promise<JefeCuadrillaDTO[]> {
+  const res = await fetch("/api/dependencia/jefes");
+  if (!res.ok) throw new Error("Error al cargar jefes de cuadrilla");
   return res.json();
 }
 

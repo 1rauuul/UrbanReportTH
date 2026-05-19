@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import TopBar from "@/components/layout/TopBar";
 import Badge from "@/components/ui/Badge";
+import IncidenciaIcon from "@/components/ui/IncidenciaIcon";
 import SyncBadge from "@/components/ui/SyncBadge";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -45,9 +46,10 @@ export default function MisReportesPage() {
     );
   }
 
+  const estatusCerrado = new Set(["cerrado", "cerrado_administrativamente"]);
   const filtrados = reportes.filter((r) => {
-    if (filtro === "activos") return r.estatus !== "resuelto" && r.estatus !== "cerrado";
-    if (filtro === "resueltos") return r.estatus === "resuelto" || r.estatus === "cerrado";
+    if (filtro === "activos") return !estatusCerrado.has(r.estatus);
+    if (filtro === "resueltos") return estatusCerrado.has(r.estatus);
     return true;
   });
 
@@ -110,9 +112,7 @@ export default function MisReportesPage() {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex gap-3">
-                              <span className="text-2xl" aria-hidden="true">
-                                {tipo?.icon}
-                              </span>
+                              {tipo && <IncidenciaIcon icon={tipo.icon} className="h-5 w-5 text-muted" />}
                               <div>
                                 <p className="font-semibold text-primary">{reporte.folio}</p>
                                 <p className="text-sm font-semibold">{tipo?.label}</p>

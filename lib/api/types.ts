@@ -1,4 +1,4 @@
-import type { Estatus, TipoIncidencia } from "@/lib/mock-data";
+import type { EstatusReporte, TipoIncidencia } from "@/lib/mock-data";
 
 export type SyncStatus =
   | "synced"
@@ -16,24 +16,34 @@ export interface ReporteDTO {
   direccion: string;
   lat?: number | null;
   lng?: number | null;
-  estatus: Estatus;
+  estatus: EstatusReporte;
   dependencia: string;
+  dependenciaId?: string | null;
   fecha: string;
   ciudadano: string;
   fotoUrl?: string | null;
   syncStatus?: SyncStatus;
   clientRequestId?: string;
+  jefeCuadrillaId?: string | null;
 }
 
 export interface HistorialDTO {
-  estatus: Estatus;
+  estatus: EstatusReporte;
   fecha: string;
   nota: string;
   dependencia?: string;
+  actor?: string;
 }
 
 export interface EvaluacionDTO {
   estrellas: number;
   comentario: string;
   fecha: string;
+}
+
+export interface JefeCuadrillaDTO {
+  id: string;
+  nombre: string;
+  email: string;
+  dependenciaId: string;
 }

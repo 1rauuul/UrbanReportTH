@@ -2,11 +2,10 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Estatus, HistorialEstatus, Reporte } from "@/lib/mock-data";
+import type { EstatusReporte, HistorialEstatus, Reporte } from "@/lib/mock-data";
 import {
   fetchAllReportes,
   fetchReportes,
-  asignarDependenciaApi,
   actualizarEstatusApi,
   evaluarReporteApi,
 } from "@/lib/api/client";
@@ -34,20 +33,17 @@ interface AppState {
   ultimoReporteId: string | null;
   ultimoFolio: string | null;
   ultimoEsPendiente: boolean;
-  dependenciaActiva: string;
   loading: boolean;
   error: string | null;
 
   setCiudadano: (ciudadano: Ciudadano) => void;
   logout: () => Promise<void>;
   logoutCiudadano: () => void;
-  setDependenciaActiva: (dependencia: string) => void;
   cargarReportesCiudadano: () => Promise<void>;
   cargarReportesGobierno: () => Promise<void>;
   cargarDetalleReporte: (id: string) => Promise<void>;
   setUltimoReporte: (id: string, folio: string, esPendiente: boolean) => void;
-  asignarDependencia: (id: string, dependencia: string, nota: string) => Promise<void>;
-  actualizarEstatus: (id: string, estatus: Estatus, nota: string) => Promise<void>;
+  actualizarEstatus: (id: string, estatus: EstatusReporte, nota: string) => Promise<void>;
   evaluarReporte: (id: string, estrellas: number, comentario: string) => Promise<void>;
   mergeReporte: (reporte: Reporte) => void;
   resetDemo: () => void;
@@ -67,7 +63,7 @@ function pendingToReporte(p: PendingReport): Reporte {
         : p.referencia,
     lat: p.lat,
     lng: p.lng,
-    estatus: "recibido",
+    estatus: "creado",
     dependencia: "Sin asignar",
     fecha: new Date(p.createdAt).toISOString().slice(0, 10),
     ciudadano: p.ciudadanoNombre,
@@ -102,13 +98,10 @@ export const useAppStore = create<AppState>()(
       ultimoReporteId: null,
       ultimoFolio: null,
       ultimoEsPendiente: false,
-      dependenciaActiva: "Servicios Públicos",
       loading: false,
       error: null,
 
-      setCiudadano: (ciudadano) => {
-        set({ ciudadano });
-      },
+      setCiudadano: (ciudadano) => set({ ciudadano }),
 
       logout: async () => {
         await fetch("/api/auth/logout", { method: "POST" });
@@ -116,8 +109,6 @@ export const useAppStore = create<AppState>()(
       },
 
       logoutCiudadano: () => set({ ciudadano: null, reportes: [] }),
-
-      setDependenciaActiva: (dependencia) => set({ dependenciaActiva: dependencia }),
 
       setUltimoReporte: (id, folio, esPendiente) =>
         set({ ultimoReporteId: id, ultimoFolio: folio, ultimoEsPendiente: esPendiente }),
@@ -169,7 +160,7 @@ export const useAppStore = create<AppState>()(
                 ...get().historial,
                 [id]: [
                   {
-                    estatus: "recibido",
+                    estatus: "creado",
                     fecha: new Date(p.createdAt).toLocaleString("es-MX"),
                     nota:
                       p.status === "sync_failed"
@@ -189,14 +180,11 @@ export const useAppStore = create<AppState>()(
           set({
             historial: { ...get().historial, [id]: data.historial },
             evaluaciones: data.evaluacion
-              ? {
-                  ...get().evaluaciones,
-                  [id]: data.evaluacion,
-                }
+              ? { ...get().evaluaciones, [id]: data.evaluacion }
               : get().evaluaciones,
           });
         } catch {
-          /* offline detail uses cached historial */
+          /* sin conexión: usa historial en caché */
         }
       },
 
@@ -212,24 +200,6 @@ export const useAppStore = create<AppState>()(
         } else {
           set({ reportes: [reporte, ...reportes] });
         }
-      },
-
-      asignarDependencia: async (id, dependencia, nota) => {
-        const updated = await asignarDependenciaApi(id, dependencia, nota);
-        const ahora = fechaLocal();
-        const { reportes, historial } = get();
-        const entrada: HistorialEstatus = {
-          estatus: "asignado",
-          fecha: ahora,
-          nota: nota.trim() || `Canalizado a ${dependencia}.`,
-          dependencia,
-        };
-        set({
-          reportes: reportes.map((r) =>
-            r.id === id ? { ...updated, syncStatus: "synced" } : r
-          ),
-          historial: { ...historial, [id]: [...(historial[id] ?? []), entrada] },
-        });
       },
 
       actualizarEstatus: async (id, estatus, nota) => {
@@ -254,10 +224,7 @@ export const useAppStore = create<AppState>()(
       evaluarReporte: async (id, estrellas, comentario) => {
         const ev = await evaluarReporteApi(id, estrellas, comentario);
         set({
-          evaluaciones: {
-            ...get().evaluaciones,
-            [id]: ev,
-          },
+          evaluaciones: { ...get().evaluaciones, [id]: ev },
         });
       },
 
@@ -274,9 +241,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "urbareport-session",
-      partialize: (s) => ({
-        dependenciaActiva: s.dependenciaActiva,
-      }),
+      partialize: (s) => ({ ciudadano: s.ciudadano }),
     }
   )
 );
@@ -288,24 +253,25 @@ export function useReportesCiudadano() {
   return reportes;
 }
 
-export function useReportesDependencia() {
-  const dependencia = useAppStore((s) => s.dependenciaActiva);
-  const reportes = useAppStore((s) => s.reportes);
-  return reportes.filter(
-    (r) => r.dependencia === dependencia && r.syncStatus !== "pending_sync"
-  );
-}
-
 export function useStatsGobierno() {
   const reportes = useAppStore((s) => s.reportes);
   return {
     total: reportes.length,
-    sinAsignar: reportes.filter((r) => r.dependencia === "Sin asignar").length,
+    pendientes: reportes.filter(
+      (r) =>
+        r.estatus === "asignado_a_dependencia" ||
+        r.estatus === "asignado_a_jefe_cuadrilla"
+    ).length,
     enProceso: reportes.filter(
-      (r) => r.estatus === "en_proceso" || r.estatus === "asignado"
+      (r) => r.estatus === "en_proceso" || r.estatus === "solucionado_por_cuadrilla"
     ).length,
     resueltos: reportes.filter(
-      (r) => r.estatus === "resuelto" || r.estatus === "cerrado"
+      (r) => r.estatus === "cerrado" || r.estatus === "cerrado_administrativamente"
+    ).length,
+    pendienteRevision: reportes.filter(
+      (r) =>
+        r.estatus === "pendiente_revision_ciudadana" ||
+        r.estatus === "reabierto_por_ciudadano"
     ).length,
   };
 }

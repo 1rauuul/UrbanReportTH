@@ -26,6 +26,7 @@ export default function LocationMap({ value, onChange }: Props) {
     <MapInner
       center={value ? [value.lat, value.lng] : TEHUACAN}
       position={value}
+      flyTarget={value ? [value.lat, value.lng] : null}
       onChange={onChange}
     />
   );

@@ -1,24 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toReporteDTO } from "@/lib/api/mappers";
-import type { EstatusReporte } from "@/lib/mock-data";
 import { getStaffSession } from "@/lib/server/session";
 
 interface Params {
   params: Promise<{ id: string }>;
 }
-
-const VALID: EstatusReporte[] = [
-  "creado",
-  "asignado_a_dependencia",
-  "asignado_a_jefe_cuadrilla",
-  "en_proceso",
-  "solucionado_por_cuadrilla",
-  "pendiente_revision_ciudadana",
-  "reabierto_por_ciudadano",
-  "cerrado",
-  "cerrado_administrativamente",
-];
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   const session = await getStaffSession();
@@ -28,21 +15,18 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const { id } = await params;
   const body = await req.json();
-  const estatus = body.estatus as EstatusReporte;
-  const nota = String(body.nota ?? "").trim() || `Estatus actualizado a ${estatus}.`;
-
-  if (!VALID.includes(estatus)) {
-    return NextResponse.json({ error: "Estatus inválido" }, { status: 400 });
-  }
+  const nota =
+    String(body.nota ?? "").trim() || "Cerrado administrativamente por la dependencia.";
 
   const reporte = await prisma.reporte.findUnique({
     where: { id },
     include: { asignacion: true },
   });
   if (!reporte) {
-    return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    return NextResponse.json({ error: "Reporte no encontrado" }, { status: 404 });
   }
 
+  // Dependencia solo puede cerrar sus propios reportes
   if (
     session.rol === "DEPENDENCIA" &&
     reporte.dependenciaId !== session.dependenciaId
@@ -54,15 +38,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     await tx.historialEstatus.create({
       data: {
         reporteId: id,
-        estatus,
+        estatus: "cerrado_administrativamente",
         nota,
         dependencia: reporte.dependencia,
         actor: session.rol === "MESA_CONTROL" ? "Mesa de Control" : "Dependencia",
       },
     });
+
     return tx.reporte.update({
       where: { id },
-      data: { estatus },
+      data: { estatus: "cerrado_administrativamente" },
       include: { asignacion: true },
     });
   });

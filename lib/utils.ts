@@ -1,15 +1,31 @@
-import { TipoIncidencia } from "@/lib/mock-data";
+import type { TipoIncidencia } from "@/lib/mock-data";
 
-const MAPA: Record<TipoIncidencia, string> = {
-  bache: "Obras Públicas",
-  basura: "Servicios Públicos",
-  fuga: "Servicios Públicos",
-  luminaria: "Alumbrado Público",
-  otro: "Protección Civil",
+/** slug → nombre de la dependencia en BD */
+const TIPO_A_SLUG: Record<TipoIncidencia, string> = {
+  bache: "obra-publica",
+  alumbrado: "obra-publica",
+  fuga: "oosapat",
+  basura: "ooselite",
 };
 
+const TIPO_A_NOMBRE: Record<TipoIncidencia, string> = {
+  bache: "Obra Pública",
+  alumbrado: "Obra Pública",
+  fuga: "OOSAPAT",
+  basura: "OOSELITE",
+};
+
+export function slugDependencia(tipo: TipoIncidencia): string {
+  return TIPO_A_SLUG[tipo];
+}
+
+export function nombreDependencia(tipo: TipoIncidencia): string {
+  return TIPO_A_NOMBRE[tipo];
+}
+
+/** @deprecated Usar nombreDependencia o slugDependencia */
 export function sugerirDependencia(tipo: TipoIncidencia): string {
-  return MAPA[tipo];
+  return TIPO_A_NOMBRE[tipo];
 }
 
 export function generarFolio(seq: number): string {

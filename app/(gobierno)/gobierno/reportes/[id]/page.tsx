@@ -1,45 +1,68 @@
 "use client";
 
-import { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import { use, useEffect } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { DEPENDENCIAS, TIPOS_INCIDENCIA, type Reporte } from "@/lib/mock-data";
-import { sugerirDependencia } from "@/lib/utils";
+import Button from "@/components/ui/Button";
+import IncidenciaIcon from "@/components/ui/IncidenciaIcon";
+import { ESTATUS_LABELS, TIPOS_INCIDENCIA } from "@/lib/mock-data";
 import { useAppStore } from "@/lib/store";
+import { cierreAdminApi } from "@/lib/api/client";
+import { useState } from "react";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-function GobiernoReporteForm({
-  reporte,
-  id,
-}: {
-  reporte: Reporte;
-  id: string;
-}) {
-  const router = useRouter();
-  const asignarDependencia = useAppStore((s) => s.asignarDependencia);
-  const setDependenciaActiva = useAppStore((s) => s.setDependenciaActiva);
-  const sugerida = sugerirDependencia(reporte.tipo);
+export default function GobiernoReporteDetallePage({ params }: Props) {
+  const { id } = use(params);
+  const reportes = useAppStore((s) => s.reportes);
+  const historial = useAppStore((s) => s.historial);
+  const cargarDetalleReporte = useAppStore((s) => s.cargarDetalleReporte);
+  const mergeReporte = useAppStore((s) => s.mergeReporte);
 
-  const [dependencia, setDependencia] = useState(sugerida);
+  const reporte = reportes.find((r) => r.id === id);
+  const timeline = historial[id] ?? [];
+
   const [nota, setNota] = useState("");
-  const [guardado, setGuardado] = useState(false);
+  const [cerrando, setCerrando] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    void cargarDetalleReporte(id);
+  }, [id, cargarDetalleReporte]);
+
+  if (!reporte) {
+    return (
+      <div className="p-8 text-center text-muted">
+        Reporte no encontrado.{" "}
+        <Link href="/gobierno/dashboard" className="text-primary">
+          Volver
+        </Link>
+      </div>
+    );
+  }
 
   const tipo = TIPOS_INCIDENCIA.find((t) => t.id === reporte.tipo);
+  const puedeAdmin =
+    reporte.estatus === "reabierto_por_ciudadano" ||
+    reporte.estatus === "asignado_a_dependencia";
 
-  async function confirmar() {
+  async function handleCierreAdmin() {
+    if (!nota.trim()) {
+      setError("Agrega una nota de justificación.");
+      return;
+    }
+    setCerrando(true);
+    setError("");
     try {
-      await asignarDependencia(id, dependencia, nota);
-      setDependenciaActiva(dependencia);
-      setGuardado(true);
-      setTimeout(() => router.push("/gobierno/dashboard"), 1200);
-    } catch {
-      setGuardado(false);
+      const updated = await cierreAdminApi(id, nota);
+      mergeReporte(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error al cerrar.");
+    } finally {
+      setCerrando(false);
     }
   }
 
@@ -55,9 +78,10 @@ function GobiernoReporteForm({
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-primary">{reporte.folio}</h1>
-          <p className="text-lg font-semibold">
-            {tipo?.icon} {tipo?.label} · {reporte.colonia}
-          </p>
+          <div className="mt-1 flex items-center gap-2 text-lg font-semibold">
+            {tipo && <IncidenciaIcon icon={tipo.icon} className="h-5 w-5 text-muted" />}
+            {tipo?.label} · {reporte.colonia}
+          </div>
         </div>
         <Badge estatus={reporte.estatus} />
       </header>
@@ -80,59 +104,61 @@ function GobiernoReporteForm({
               <dd>{reporte.referencia}</dd>
             </div>
             <div>
+              <dt className="font-semibold text-muted">Dependencia asignada</dt>
+              <dd className="font-semibold text-primary">{reporte.dependencia}</dd>
+            </div>
+            <div>
               <dt className="font-semibold text-muted">Fecha</dt>
               <dd>{reporte.fecha}</dd>
             </div>
           </dl>
         </Card>
 
-        <Card>
-          <h2 className="mb-3 text-base font-bold">Asignar dependencia</h2>
-          <p className="mb-4 text-sm text-muted">
-            Clasificación sugerida:{" "}
-            <span className="font-bold text-primary">{sugerida}</span>
-          </p>
-          <select
-            className="mb-4 min-h-12 w-full rounded-lg border-2 border-border bg-white px-4 text-base font-semibold"
-            value={dependencia}
-            onChange={(e) => setDependencia(e.target.value)}
-          >
-            {DEPENDENCIAS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
-          <textarea
-            className="mb-4 min-h-24 w-full rounded-lg border-2 border-border p-3 text-base"
-            placeholder="Nota de canalización..."
-            value={nota}
-            onChange={(e) => setNota(e.target.value)}
-          />
-          <Button fullWidth onClick={confirmar} disabled={guardado}>
-            {guardado ? "¡Canalizado!" : "Confirmar canalización"}
-          </Button>
-        </Card>
+        <div className="flex flex-col gap-4">
+          <Card>
+            <h2 className="mb-3 text-base font-bold">Historial de estatus</h2>
+            {timeline.length === 0 ? (
+              <p className="text-sm text-muted">Sin movimientos aún.</p>
+            ) : (
+              <ol className="flex flex-col gap-1">
+                {timeline.map((item, i) => (
+                  <li key={i} className="border-l-2 border-border pl-3">
+                    <p className="text-sm font-semibold">
+                      {ESTATUS_LABELS[item.estatus] ?? item.estatus}
+                    </p>
+                    <p className="text-xs text-muted">{item.fecha}</p>
+                    <p className="mt-0.5 text-sm">{item.nota}</p>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
+
+          {puedeAdmin && (
+            <Card>
+              <h2 className="mb-3 text-base font-bold">Cierre administrativo</h2>
+              <p className="mb-3 text-sm text-muted">
+                Mesa de control puede cerrar este reporte administrativamente con una justificación.
+              </p>
+              <textarea
+                className="mb-3 min-h-20 w-full rounded border border-border p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary/30"
+                placeholder="Motivo del cierre administrativo..."
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+              />
+              {error && <p className="mb-2 text-sm text-danger">{error}</p>}
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={handleCierreAdmin}
+                disabled={cerrando}
+              >
+                {cerrando ? "Cerrando…" : "Cerrar administrativamente"}
+              </Button>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
-}
-
-export default function GobiernoReporteDetallePage({ params }: Props) {
-  const { id } = use(params);
-  const reportes = useAppStore((s) => s.reportes);
-  const reporte = reportes.find((r) => r.id === id);
-
-  if (!reporte) {
-    return (
-      <div className="p-8 text-center text-muted">
-        Reporte no encontrado.{" "}
-        <Link href="/gobierno/dashboard" className="text-primary">
-          Volver
-        </Link>
-      </div>
-    );
-  }
-
-  return <GobiernoReporteForm key={id} reporte={reporte} id={id} />;
 }

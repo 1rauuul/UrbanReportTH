@@ -3,8 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Rol {
+  MESA_CONTROL
+  DEPENDENCIA
+  JEFE_CUADRILLA
 }
 
 model Ciudadano {
@@ -13,6 +20,46 @@ model Ciudadano {
   telefono  String    @unique
   createdAt DateTime  @default(now())
   reportes  Reporte[]
+}
+
+model Dependencia {
+  id       String            @id @default(cuid())
+  nombre   String            @unique
+  slug     String            @unique
+  usuarios Usuario[]
+  jefes    JefeDeCuadrilla[]
+  reportes Reporte[]
+}
+
+model Usuario {
+  id              String           @id @default(cuid())
+  nombre          String
+  email           String           @unique
+  passwordHash    String
+  rol             Rol
+  dependenciaId   String?
+  dependencia     Dependencia?     @relation(fields: [dependenciaId], references: [id])
+  jefeDeCuadrilla JefeDeCuadrilla?
+  createdAt       DateTime         @default(now())
+}
+
+model JefeDeCuadrilla {
+  id            String              @id @default(cuid())
+  usuarioId     String              @unique
+  usuario       Usuario             @relation(fields: [usuarioId], references: [id])
+  dependenciaId String
+  dependencia   Dependencia         @relation(fields: [dependenciaId], references: [id])
+  asignaciones  AsignacionReporte[]
+}
+
+model AsignacionReporte {
+  id              String          @id @default(cuid())
+  reporteId       String          @unique
+  reporte         Reporte         @relation(fields: [reporteId], references: [id], onDelete: Cascade)
+  jefeCuadrillaId String
+  jefeCuadrilla   JefeDeCuadrilla @relation(fields: [jefeCuadrillaId], references: [id])
+  nota            String          @default("")
+  createdAt       DateTime        @default(now())
 }
 
 model Reporte {
@@ -26,8 +73,10 @@ model Reporte {
   direccion        String
   lat              Float?
   lng              Float?
-  estatus          String              @default("recibido")
+  estatus          String              @default("creado")
   dependencia      String              @default("Sin asignar")
+  dependenciaId    String?
+  dependenciaRel   Dependencia?        @relation(fields: [dependenciaId], references: [id])
   ciudadanoId      String
   ciudadano        Ciudadano           @relation(fields: [ciudadanoId], references: [id])
   ciudadanoNombre  String
@@ -35,6 +84,7 @@ model Reporte {
   createdAt        DateTime            @default(now())
   historial        HistorialEstatus[]
   evaluacion       Evaluacion?
+  asignacion       AsignacionReporte?
 }
 
 model HistorialEstatus {
@@ -44,6 +94,7 @@ model HistorialEstatus {
   estatus     String
   nota        String
   dependencia String?
+  actor       String?
   createdAt   DateTime @default(now())
 }
 

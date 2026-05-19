@@ -1,6 +1,7 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { useRef } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -26,13 +27,27 @@ function ClickHandler({ onChange }: { onChange: (loc: MapLocation) => void }) {
   return null;
 }
 
+function FlyTo({ target }: { target: [number, number] | null }) {
+  const map = useMap();
+  const lastRef = useRef<string | null>(null);
+  if (target) {
+    const key = target.join(",");
+    if (key !== lastRef.current) {
+      lastRef.current = key;
+      map.flyTo(target, 17, { animate: true, duration: 1 });
+    }
+  }
+  return null;
+}
+
 interface Props {
   center: [number, number];
   position: MapLocation | null;
+  flyTarget: [number, number] | null;
   onChange: (loc: MapLocation) => void;
 }
 
-export default function LocationMapInner({ center, position, onChange }: Props) {
+export default function LocationMapInner({ center, position, flyTarget, onChange }: Props) {
   return (
     <div className="overflow-hidden rounded border border-input-border">
       <MapContainer
@@ -46,6 +61,7 @@ export default function LocationMapInner({ center, position, onChange }: Props) 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <ClickHandler onChange={onChange} />
+        <FlyTo target={flyTarget} />
         {position && <Marker position={[position.lat, position.lng]} icon={icon} />}
       </MapContainer>
       <div className="border-t border-input-border bg-input-soft/50 px-3 py-2">

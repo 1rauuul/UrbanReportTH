@@ -1,8 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
-const COOKIE_NAME = "urbareport_session";
-const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const CITIZEN_COOKIE = "urbareport_session";
+const STAFF_COOKIE = "urbareport_staff_session";
+const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 días
 
 function sign(payload: string): string {
   return createHmac("sha256", process.env.SESSION_SECRET!)
@@ -10,14 +11,26 @@ function sign(payload: string): string {
     .digest("base64url");
 }
 
-function buildCookieValue(ciudadanoId: string): string {
+function verifyMac(payload: string, mac: string): boolean {
+  const expected = sign(payload);
+  try {
+    return timingSafeEqual(
+      Buffer.from(mac, "base64url"),
+      Buffer.from(expected, "base64url")
+    );
+  } catch {
+    return false;
+  }
+}
+
+// ─── Sesión ciudadano ─────────────────────────────────────────────────────────
+
+function buildCitizenCookie(ciudadanoId: string): string {
   const exp = Date.now() + MAX_AGE_MS;
   const payload = `${ciudadanoId}.${exp}`;
   return `${payload}.${sign(payload)}`;
 }
 
-/** Verifica la firma y expiración de un valor de cookie crudo.
- *  Retorna el ciudadanoId si es válida, o null si no. */
 export function parseSessionCookie(
   raw: string | undefined
 ): { ciudadanoId: string } | null {
@@ -27,20 +40,7 @@ export function parseSessionCookie(
   const payload = raw.slice(0, lastDot);
   const mac = raw.slice(lastDot + 1);
   if (!payload || !mac) return null;
-
-  const expected = sign(payload);
-  try {
-    if (
-      !timingSafeEqual(
-        Buffer.from(mac, "base64url"),
-        Buffer.from(expected, "base64url")
-      )
-    )
-      return null;
-  } catch {
-    return null;
-  }
-
+  if (!verifyMac(payload, mac)) return null;
   const dotIdx = payload.indexOf(".");
   if (dotIdx === -1) return null;
   const ciudadanoId = payload.slice(0, dotIdx);
@@ -49,18 +49,16 @@ export function parseSessionCookie(
   return { ciudadanoId };
 }
 
-/** Para Route Handlers y Server Components: lee la cookie de next/headers. */
 export async function getSession(): Promise<{ ciudadanoId: string } | null> {
   const cookieStore = await cookies();
-  const raw = cookieStore.get(COOKIE_NAME)?.value;
+  const raw = cookieStore.get(CITIZEN_COOKIE)?.value;
   return parseSessionCookie(raw);
 }
 
-/** Para Route Handlers: crea la sesión y escribe la cookie httpOnly. */
 export async function createSession(ciudadanoId: string): Promise<void> {
-  const value = buildCookieValue(ciudadanoId);
+  const value = buildCitizenCookie(ciudadanoId);
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, value, {
+  cookieStore.set(CITIZEN_COOKIE, value, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -69,8 +67,66 @@ export async function createSession(ciudadanoId: string): Promise<void> {
   });
 }
 
-/** Para Route Handlers: elimina la cookie de sesión. */
 export async function clearSession(): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, "", { maxAge: 0, path: "/" });
+  cookieStore.set(CITIZEN_COOKIE, "", { maxAge: 0, path: "/" });
+}
+
+// ─── Sesión staff ─────────────────────────────────────────────────────────────
+
+export interface StaffSession {
+  userId: string;
+  rol: string;
+  dependenciaId: string | null;
+}
+
+function buildStaffCookie(session: StaffSession): string {
+  const exp = Date.now() + MAX_AGE_MS;
+  const depPart = session.dependenciaId ?? "";
+  const payload = `${session.userId}|${session.rol}|${depPart}|${exp}`;
+  return `${payload}.${sign(payload)}`;
+}
+
+export function parseStaffSessionCookie(
+  raw: string | undefined
+): StaffSession | null {
+  if (!raw) return null;
+  const lastDot = raw.lastIndexOf(".");
+  if (lastDot === -1) return null;
+  const payload = raw.slice(0, lastDot);
+  const mac = raw.slice(lastDot + 1);
+  if (!payload || !mac) return null;
+  if (!verifyMac(payload, mac)) return null;
+  const parts = payload.split("|");
+  if (parts.length !== 4) return null;
+  const [userId, rol, depPart, expStr] = parts;
+  if (Date.now() > Number(expStr)) return null;
+  return {
+    userId,
+    rol,
+    dependenciaId: depPart || null,
+  };
+}
+
+export async function getStaffSession(): Promise<StaffSession | null> {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(STAFF_COOKIE)?.value;
+  return parseStaffSessionCookie(raw);
+}
+
+export async function createStaffSession(session: StaffSession): Promise<void> {
+  const value = buildStaffCookie(session);
+  const cookieStore = await cookies();
+  cookieStore.set(STAFF_COOKIE, value, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: MAX_AGE_MS / 1000,
+  });
+}
+
+export async function clearStaffSession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(STAFF_COOKIE, "", { maxAge: 0, path: "/" });
 }
