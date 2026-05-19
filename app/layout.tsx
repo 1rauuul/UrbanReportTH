@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import StoreHydration from "@/components/providers/StoreHydration";
 import OfflineSyncProvider from "@/components/providers/OfflineSyncProvider";
 import PwaRegister from "@/components/providers/PwaRegister";
+import AuthHydrator from "@/components/providers/AuthHydrator";
 import "./globals.css";
 
 const roboto = Roboto({
@@ -39,6 +40,7 @@ export default function RootLayout({
     <html lang="es" className={`${roboto.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-text">
         <StoreHydration>
+          <AuthHydrator />
           <OfflineSyncProvider>
             <PwaRegister />
             {children}

@@ -1,3 +1,4 @@
+// TODO(auth): post-MVP, verificar sesión del ciudadano antes de devolver el detalle.
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toHistorialDTO, toReporteDTO, toEvaluacionDTO } from "@/lib/api/mappers";

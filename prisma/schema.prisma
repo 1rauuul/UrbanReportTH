@@ -64,3 +64,10 @@ model PushSubscription {
   auth      String
   createdAt DateTime @default(now())
 }
+
+model OtpCode {
+  telefono  String   @id
+  codigo    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

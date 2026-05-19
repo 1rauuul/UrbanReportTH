@@ -11,7 +11,7 @@ import { useAppStore } from "@/lib/store";
 export default function PerfilPage() {
   const router = useRouter();
   const ciudadano = useAppStore((s) => s.ciudadano);
-  const logoutCiudadano = useAppStore((s) => s.logoutCiudadano);
+  const logout = useAppStore((s) => s.logout);
   const resetDemo = useAppStore((s) => s.resetDemo);
 
   if (!ciudadano) {
@@ -55,8 +55,8 @@ export default function PerfilPage() {
             variant="secondary"
             fullWidth
             className="mt-6"
-            onClick={() => {
-              logoutCiudadano();
+            onClick={async () => {
+              await logout();
               router.push("/login");
             }}
           >

@@ -1,3 +1,4 @@
+// TODO(auth): post-MVP, verificar que la evaluación la envía el dueño del reporte.
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toEvaluacionDTO } from "@/lib/api/mappers";

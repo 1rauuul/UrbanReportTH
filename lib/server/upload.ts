@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { supabaseAdmin } from "./supabase";
+import { getSupabaseAdmin } from "./supabase";
 
 const BUCKET = "reportes";
 
@@ -12,6 +12,8 @@ export async function saveUpload(file: File): Promise<string> {
 
   const ext = file.type.includes("png") ? "png" : "jpg";
   const name = `${randomUUID()}.${ext}`;
+
+  const supabaseAdmin = getSupabaseAdmin();
 
   const { error } = await supabaseAdmin.storage
     .from(BUCKET)

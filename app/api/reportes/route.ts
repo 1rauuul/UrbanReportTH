@@ -1,3 +1,6 @@
+// TODO(auth): los endpoints de este archivo confían en el teléfono y nombre que vienen
+// del formData/query, lo que permite suplantar a otro ciudadano. Post-MVP, leer el
+// ciudadano de la cookie de sesión (getSession()) en lugar de aceptar esos campos.
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toReporteDTO } from "@/lib/api/mappers";

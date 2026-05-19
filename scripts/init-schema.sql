@@ -75,6 +75,14 @@ CREATE UNIQUE INDEX "Evaluacion_reporteId_key" ON "Evaluacion"("reporteId");
 -- CreateIndex
 CREATE UNIQUE INDEX "PushSubscription_endpoint_key" ON "PushSubscription"("endpoint");
 
+-- CreateTable
+CREATE TABLE "OtpCode" (
+  "telefono"  TEXT PRIMARY KEY,
+  "codigo"    TEXT NOT NULL,
+  "expiresAt" TIMESTAMP(3) NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 -- AddForeignKey
 ALTER TABLE "Reporte" ADD CONSTRAINT "Reporte_ciudadanoId_fkey" FOREIGN KEY ("ciudadanoId") REFERENCES "Ciudadano"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 

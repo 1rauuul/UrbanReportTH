@@ -10,7 +10,7 @@ import {
   actualizarEstatusApi,
   evaluarReporteApi,
 } from "@/lib/api/client";
-import { fechaLocal, normalizarTelefono } from "@/lib/utils";
+import { fechaLocal } from "@/lib/utils";
 import type { PendingReport } from "@/lib/offline/db";
 import { getPendingReports } from "@/lib/offline/sync-queue";
 import { esFolioPendiente } from "@/lib/offline/folio";
@@ -38,8 +38,8 @@ interface AppState {
   loading: boolean;
   error: string | null;
 
-  registrarCiudadano: (nombre: string, telefono: string) => void;
-  loginCiudadano: (telefono: string) => boolean;
+  setCiudadano: (ciudadano: Ciudadano) => void;
+  logout: () => Promise<void>;
   logoutCiudadano: () => void;
   setDependenciaActiva: (dependencia: string) => void;
   cargarReportesCiudadano: () => Promise<void>;
@@ -106,24 +106,13 @@ export const useAppStore = create<AppState>()(
       loading: false,
       error: null,
 
-      registrarCiudadano: (nombre, telefono) => {
-        const tel = normalizarTelefono(telefono);
-        set({
-          ciudadano: { nombre: nombre.trim(), telefono: tel },
-        });
+      setCiudadano: (ciudadano) => {
+        set({ ciudadano });
       },
 
-      loginCiudadano: (telefono) => {
-        const tel = normalizarTelefono(telefono);
-        const { ciudadano } = get();
-        if (ciudadano?.telefono === tel) return true;
-        set({
-          ciudadano: {
-            nombre: ciudadano?.nombre ?? "Ciudadano",
-            telefono: tel,
-          },
-        });
-        return true;
+      logout: async () => {
+        await fetch("/api/auth/logout", { method: "POST" });
+        set({ ciudadano: null, reportes: [], historial: {}, evaluaciones: {} });
       },
 
       logoutCiudadano: () => set({ ciudadano: null, reportes: [] }),
@@ -286,7 +275,6 @@ export const useAppStore = create<AppState>()(
     {
       name: "urbareport-session",
       partialize: (s) => ({
-        ciudadano: s.ciudadano,
         dependenciaActiva: s.dependenciaActiva,
       }),
     }
