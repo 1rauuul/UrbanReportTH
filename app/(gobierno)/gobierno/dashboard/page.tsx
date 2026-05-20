@@ -203,6 +203,111 @@ export default function GobiernoDashboardPage() {
     }
   }
 
+  async function handleExportarInsightsPDF() {
+    if (!statsInsights) return;
+    setExportando(true);
+    try {
+      const [jsPDFModule, autoTableModule] = await Promise.all([
+        import("jspdf"),
+        import("jspdf-autotable"),
+      ]);
+      const { jsPDF } = jsPDFModule as unknown as {
+        jsPDF: new (opts?: Record<string, unknown>) => {
+          autoTable: (opts: Record<string, unknown>) => void;
+          save: (n: string) => void;
+          text: (t: string, x: number, y: number, opts?: Record<string, unknown>) => void;
+          setFontSize: (s: number) => void;
+          addPage: () => void;
+          splitTextToSize: (t: string, w: number) => string[];
+          internal: { pageSize: { getWidth: () => number } };
+        };
+      };
+
+      const doc = new jsPDF({ orientation: "portrait" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const ts = new Date().toLocaleDateString("es-MX", { day: "numeric", month: "long", year: "numeric" });
+
+      let y = 14;
+
+      doc.setFontSize(16);
+      doc.text("Informe de Inteligencia Municipal", 14, y);
+      y += 8;
+      doc.setFontSize(10);
+      doc.text(`SIMAC Tehuacan — ${ts}`, 14, y);
+      y += 6;
+      doc.text(`Total de reportes analizados: ${statsInsights.total}`, 14, y);
+      y += 10;
+
+      if (aiSummary) {
+        doc.setFontSize(11);
+        doc.text("RESUMEN EJECUTIVO IA", 14, y);
+        y += 6;
+        doc.setFontSize(8);
+
+        const lines = doc.splitTextToSize(aiSummary, pageWidth - 28);
+        for (const line of lines) {
+          if (y > 270) { doc.addPage(); y = 14; }
+          doc.text(line, 14, y);
+          y += 4;
+        }
+        y += 6;
+      }
+
+      doc.setFontSize(10);
+      doc.text("ESTADISTICAS", 14, y);
+      y += 6;
+
+      (autoTableModule as unknown as { default: (doc: unknown, opts: Record<string, unknown>) => void }).default(doc, {
+        head: [["Indicador", "Valor"]],
+        body: [
+          ["Total reportes", String(statsInsights.total)],
+          ["Tipo mas frecuente", statsInsights.tipoMasFrecuente],
+          ["Colonia mas problematica", statsInsights.coloniaMasProblematica],
+          ["Dependencia mas cargada", statsInsights.dependenciaMasCargada],
+          ["Tasa de reapertura", `${statsInsights.tasaReapertura}%`],
+        ],
+        startY: y,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [155, 34, 71], textColor: 255 },
+        margin: { left: 14 },
+      });
+      y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+
+      (autoTableModule as unknown as { default: (doc: unknown, opts: Record<string, unknown>) => void }).default(doc, {
+        head: [["Tipo", "Cantidad", "%"]],
+        body: statsInsights.porTipo.map((t) => [t.label, String(t.count), `${Math.round(t.count / Math.max(1, statsInsights.total) * 100)}%`]),
+        startY: y,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [155, 34, 71], textColor: 255 },
+        margin: { left: 14 },
+      });
+      y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+
+      (autoTableModule as unknown as { default: (doc: unknown, opts: Record<string, unknown>) => void }).default(doc, {
+        head: [["Colonia", "Reportes"]],
+        body: statsInsights.porColonia.slice(0, 10).map((c) => [c.colonia, String(c.count)]),
+        startY: y,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [155, 34, 71], textColor: 255 },
+        margin: { left: 14 },
+      });
+      y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 8;
+
+      (autoTableModule as unknown as { default: (doc: unknown, opts: Record<string, unknown>) => void }).default(doc, {
+        head: [["Dependencia", "Reportes"]],
+        body: statsInsights.porDependencia.map((d) => [d.dependencia, String(d.count)]),
+        startY: y,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [155, 34, 71], textColor: 255 },
+        margin: { left: 14 },
+      });
+
+      doc.save(`informe_inteligencia_tehuacan_${new Date().toISOString().slice(0, 10)}.pdf`);
+    } finally {
+      setExportando(false);
+    }
+  }
+
   function limpiarFiltros() {
     setFiltros({
       tipo: "",
@@ -505,13 +610,24 @@ export default function GobiernoDashboardPage() {
                   Analisis estadistico sobre {reportes.length} reportes
                 </p>
               </div>
-              <Button
-                variant="accent"
-                disabled={aiLoading}
-                onClick={handleGenerarInsights}
-              >
-                {aiLoading ? "Analizando..." : statsInsights ? "Re-analizar" : "Generar analisis IA"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="accent"
+                  disabled={aiLoading}
+                  onClick={handleGenerarInsights}
+                >
+                  {aiLoading ? "Analizando..." : statsInsights ? "Re-analizar" : "Generar analisis IA"}
+                </Button>
+                {statsInsights && (
+                  <Button
+                    variant="secondary"
+                    disabled={exportando}
+                    onClick={handleExportarInsightsPDF}
+                  >
+                    {exportando ? "Exportando..." : "Exportar PDF"}
+                  </Button>
+                )}
+              </div>
             </div>
           </Card>
 
