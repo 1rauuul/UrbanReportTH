@@ -2,10 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { generarFolioServidor } from "./mappers";
 
 export async function nextFolio(): Promise<string> {
-  const last = await prisma.reporte.findFirst({
-    orderBy: { createdAt: "desc" },
-    select: { folio: true },
-  });
-  const num = last ? parseInt(last.folio.split("-").pop() ?? "0") + 1 : 1;
-  return generarFolioServidor(num);
+  await prisma.$executeRawUnsafe(`CREATE SEQUENCE IF NOT EXISTS reporte_folio_seq`);
+
+  const result = await prisma.$queryRawUnsafe<[{ nextval: bigint }]>(
+    `SELECT nextval('reporte_folio_seq')`
+  );
+  return generarFolioServidor(Number(result[0].nextval));
 }
