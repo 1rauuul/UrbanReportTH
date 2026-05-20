@@ -40,6 +40,7 @@ export interface Reporte {
   lat?: number | null;
   lng?: number | null;
   fotoUrl?: string | null;
+  fotoVerificacion?: "verificada" | "con_dudas" | "no_corresponde" | null;
   syncStatus?: SyncStatus;
   clientRequestId?: string;
   lastError?: string;
