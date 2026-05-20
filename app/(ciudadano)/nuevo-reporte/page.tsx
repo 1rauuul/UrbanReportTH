@@ -243,6 +243,18 @@ export default function NuevoReportePage() {
 
           {step === 1 && (
             <div className="mt-4 flex flex-col gap-5">
+              <div>
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">
+                  Ubicación en el mapa
+                </p>
+                <LocationMap
+                  value={ubicacion}
+                  onChange={handleUbicacionChange}
+                />
+                {geocoding && (
+                  <p className="text-xs text-muted">Detectando dirección...</p>
+                )}
+              </div>
               <Textarea
                 label="Descripción"
                 placeholder="Describe con detalle el problema que observas..."
@@ -277,18 +289,6 @@ export default function NuevoReportePage() {
                 className="bg-input-soft w-32"
               />
               {error && <p className="text-sm font-medium text-danger">{error}</p>}
-              <div>
-                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">
-                  Ubicación en el mapa
-                </p>
-                <LocationMap
-                  value={ubicacion}
-                  onChange={handleUbicacionChange}
-                />
-                {geocoding && (
-                  <p className="text-xs text-muted">Detectando dirección...</p>
-                )}
-              </div>
               <div className="flex gap-3">
                 <Button variant="secondary" className="flex-1" onClick={() => setStep(0)}>
                   Atrás
