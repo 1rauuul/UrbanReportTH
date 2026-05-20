@@ -49,16 +49,11 @@ function analyzeBache(labels: LabelsResult[]): AnalysisResult {
   let riesgo: string;
   let recomendacion: string;
 
-  if (negativeScore > 0.9 || (negativeScore > 0.5 && relevantScore > 0.7)) {
+  if (negativeScore >= 0.15 || relevantScore >= 0.5) {
     severidad = "alto";
-    descripcion = "Se identificaron danos significativos en el pavimento. El bache parece profundo y extenso.";
-    riesgo = "Alto riesgo de danos a vehiculos, accidentes viales y lesiones a peatones.";
+    descripcion = "Se identificaron danos en el pavimento. El bache requiere atencion.";
+    riesgo = "Riesgo de danos a vehiculos, accidentes viales y lesiones a peatones.";
     recomendacion = "Se recomienda intervencion urgente de Obra Publica. Senalizar la zona mientras se atiende.";
-  } else if (negativeScore > 0.25 || relevantScore > 0.9) {
-    severidad = "medio";
-    descripcion = "Se detectaron irregularidades en el pavimento. El bache es visible pero moderado.";
-    riesgo = "Riesgo moderado de danos menores a neumaticos y suspension de vehiculos.";
-    recomendacion = "Programar reparacion en los proximos 7 dias. Colocar conos preventivos.";
   } else {
     severidad = "bajo";
     descripcion = "Se observan imperfecciones leves en la superficie. No se detecta un bache profundo.";
