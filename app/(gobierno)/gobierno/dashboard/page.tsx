@@ -15,6 +15,7 @@ import {
   type TipoIncidencia,
 } from "@/lib/mock-data";
 import { useAppStore, useStatsGobierno } from "@/lib/store";
+import { computeStats, type ReporteStats } from "@/lib/api/insights";
 
 function exportarCSV(data: Record<string, string>[], nombre: string) {
   const headers = Object.keys(data[0] ?? {});
@@ -103,8 +104,13 @@ export default function GobiernoDashboardPage() {
   const reportes = useAppStore((s) => s.reportes);
   const cargarReportesGobierno = useAppStore((s) => s.cargarReportesGobierno);
   const stats = useStatsGobierno();
-  const [tab, setTab] = useState<"bandeja" | "reabiertos">("bandeja");
+  const [tab, setTab] = useState<"bandeja" | "reabiertos" | "insights">("bandeja");
   const loading = useAppStore((s) => s.loading);
+
+  const [statsInsights, setStatsInsights] = useState<ReporteStats | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   const [filtros, setFiltros] = useState({
     tipo: "" as TipoIncidencia | "",
@@ -171,6 +177,29 @@ export default function GobiernoDashboardPage() {
       else await exportarPDF(rows, nombre, "Reportes — Tehuacán");
     } finally {
       setExportando(false);
+    }
+  }
+
+  async function handleGenerarInsights() {
+    setAiLoading(true);
+    setAiError("");
+    setAiSummary(null);
+    try {
+      const statsLocal = computeStats(reportes);
+      setStatsInsights(statsLocal);
+      const res = await fetch("/api/insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportes }),
+      });
+      const data = (await res.json()) as { stats?: ReporteStats; summary?: string | null; error?: string };
+      if (data.stats) setStatsInsights(data.stats);
+      if (data.summary) setAiSummary(data.summary);
+      if (data.error) setAiError(data.error);
+    } catch {
+      setAiError("Error al generar insights.");
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -242,8 +271,20 @@ export default function GobiernoDashboardPage() {
             </span>
           )}
         </button>
+        <button
+          type="button"
+          onClick={() => setTab("insights")}
+          className={[
+            "rounded-lg px-4 py-2 text-sm font-bold",
+            tab === "insights" ? "bg-primary text-white" : "border border-border bg-white text-text",
+          ].join(" ")}
+        >
+          Insights IA
+        </button>
       </nav>
 
+      {tab !== "insights" && (
+      <>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Button
           variant="secondary"
@@ -389,8 +430,11 @@ export default function GobiernoDashboardPage() {
         >
           Exportar PDF
         </Button>
-      </div>
+        </div>
+      </>
+      )}
 
+      {tab !== "insights" && (
       <Card padding="sm" className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-left text-sm">
           <thead>
@@ -447,6 +491,171 @@ export default function GobiernoDashboardPage() {
           </tbody>
         </table>
       </Card>
+      )}
+
+      {tab === "insights" && (
+        <div className="flex flex-col gap-4">
+          <Card padding="lg">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-extrabold text-primary">
+                  Inteligencia de Negocios
+                </h2>
+                <p className="text-sm text-muted">
+                  Analisis estadistico sobre {reportes.length} reportes
+                </p>
+              </div>
+              <Button
+                variant="accent"
+                disabled={aiLoading}
+                onClick={handleGenerarInsights}
+              >
+                {aiLoading ? "Analizando..." : statsInsights ? "Re-analizar" : "Generar analisis IA"}
+              </Button>
+            </div>
+          </Card>
+
+          {!statsInsights && !aiLoading && (
+            <Card padding="md">
+              <p className="text-center text-muted">
+                Presiona "Generar analisis IA" para ver estadisticas e insights sobre los reportes.
+              </p>
+            </Card>
+          )}
+
+          {statsInsights && (
+            <>
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <Card padding="sm">
+                  <p className="text-xs font-semibold text-muted">Total reportes</p>
+                  <p className="text-2xl font-extrabold text-primary">{statsInsights.total}</p>
+                </Card>
+                <Card padding="sm">
+                  <p className="text-xs font-semibold text-muted">Tipo mas frecuente</p>
+                  <p className="text-lg font-bold text-text">{statsInsights.tipoMasFrecuente}</p>
+                </Card>
+                <Card padding="sm">
+                  <p className="text-xs font-semibold text-muted">Colonia mas problematica</p>
+                  <p className="text-lg font-bold text-text">{statsInsights.coloniaMasProblematica}</p>
+                </Card>
+                <Card padding="sm">
+                  <p className="text-xs font-semibold text-muted">Tasa de reapertura</p>
+                  <p className="text-2xl font-extrabold text-warning">{statsInsights.tasaReapertura}%</p>
+                </Card>
+              </div>
+
+              {aiSummary && (
+                <Card padding="md" className="border-success/30 bg-success/5">
+                  <h3 className="mb-2 text-base font-bold text-success">Resumen IA</h3>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-text">{aiSummary}</p>
+                </Card>
+              )}
+              {aiError && !aiSummary && (
+                <Card padding="md" className="border-warning/30 bg-warning/5">
+                  <p className="text-sm text-warning">{aiError}</p>
+                </Card>
+              )}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card padding="md">
+                  <h3 className="mb-3 text-sm font-bold text-primary">
+                    Distribucion por tipo
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {statsInsights.porTipo.map((t) => (
+                      <div key={t.tipo} className="flex items-center gap-2">
+                        <span className="w-24 shrink-0 text-xs text-text">{t.label}</span>
+                        <div className="h-5 flex-1 rounded bg-input-soft">
+                          <div
+                            className="h-full rounded bg-primary"
+                            style={{
+                              width: `${Math.min(100, (t.count / Math.max(1, statsInsights.total)) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="w-8 text-right text-xs font-bold text-muted">{t.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card padding="md">
+                  <h3 className="mb-3 text-sm font-bold text-primary">
+                    Top colonias problematicas
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {statsInsights.porColonia.slice(0, 8).map((c) => (
+                      <div key={c.colonia} className="flex items-center gap-2">
+                        <span className="w-24 shrink-0 truncate text-xs text-text" title={c.colonia}>
+                          {c.colonia}
+                        </span>
+                        <div className="h-5 flex-1 rounded bg-input-soft">
+                          <div
+                            className="h-full rounded bg-primary"
+                            style={{
+                              width: `${Math.min(100, (c.count / Math.max(1, statsInsights.porColonia[0]?.count ?? 1)) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="w-8 text-right text-xs font-bold text-muted">{c.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card padding="md">
+                  <h3 className="mb-3 text-sm font-bold text-primary">
+                    Carga por dependencia
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {statsInsights.porDependencia.map((d) => (
+                      <div key={d.dependencia} className="flex items-center gap-2">
+                        <span className="w-32 shrink-0 truncate text-xs text-text" title={d.dependencia}>
+                          {d.dependencia}
+                        </span>
+                        <div className="h-5 flex-1 rounded bg-input-soft">
+                          <div
+                            className="h-full rounded bg-primary"
+                            style={{
+                              width: `${Math.min(100, (d.count / Math.max(1, statsInsights.porDependencia[0]?.count ?? 1)) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <span className="w-8 text-right text-xs font-bold text-muted">{d.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <Card padding="md">
+                  <h3 className="mb-3 text-sm font-bold text-primary">
+                    Tendencia 30 dias
+                  </h3>
+                  <div className="flex items-end gap-px" style={{ height: 100 }}>
+                    {statsInsights.tendencia30Dias.map((d) => {
+                      const maxCount = Math.max(1, ...statsInsights.tendencia30Dias.map((x) => x.count));
+                      const h = Math.max(2, (d.count / maxCount) * 100);
+                      return (
+                        <div
+                          key={d.fecha}
+                          className="flex-1 rounded-sm bg-primary/70"
+                          style={{ height: `${h}%` }}
+                          title={`${d.fecha.slice(5)}: ${d.count}`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="mt-1 flex justify-between text-[10px] text-muted">
+                    <span>30 dias atras</span>
+                    <span>Hoy</span>
+                  </div>
+                </Card>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
     </div>
   );
 }
