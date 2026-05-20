@@ -177,16 +177,16 @@ export default function DetalleReportePage({ params }: Props) {
             <Card
               variant="default"
               padding="md"
-              className="mt-4 border-orange-200 bg-orange-50"
+              className="mt-4 border-warning/20 bg-warning/10"
             >
-              <h3 className="mb-2 text-sm font-bold text-orange-700">
+              <h3 className="mb-2 text-sm font-bold text-warning">
                 ¿Se resolvió el problema?
               </h3>
-              <p className="mb-3 text-sm text-orange-600">
+              <p className="mb-3 text-sm text-warning">
                 La cuadrilla marcó este reporte como solucionado. Por favor confirma si el problema fue atendido.
               </p>
               <textarea
-                className="mb-3 w-full rounded border border-orange-200 bg-white px-3 py-2 text-sm placeholder:text-muted/70 focus:outline-none focus:ring-1 focus:ring-orange-300"
+                className="mb-3 w-full rounded border border-warning/30 bg-white px-3 py-2 text-sm placeholder:text-muted/70 focus:outline-none focus:ring-1 focus:ring-warning/40"
                 placeholder="Comentario opcional..."
                 rows={2}
                 value={comentario}

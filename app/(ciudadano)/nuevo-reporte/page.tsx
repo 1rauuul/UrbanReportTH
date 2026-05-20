@@ -109,12 +109,10 @@ export default function NuevoReportePage() {
       <section className="flex flex-col gap-4 p-4 pb-24">
         <Card variant="panel" padding="lg">
           <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
-            <h2 className="text-base font-semibold leading-snug text-primary sm:text-lg">
+            <h2 className="text-lg font-bold leading-snug text-primary sm:text-xl">
               {panelTitles[step]}
             </h2>
-            <p className="max-w-[55%] text-right text-[10px] font-semibold uppercase leading-snug tracking-wide text-primary sm:max-w-none sm:text-xs">
-              {ciudadano.nombre.toUpperCase()}
-            </p>
+
           </div>
 
           {step === 0 && (
@@ -175,7 +173,7 @@ export default function NuevoReportePage() {
               />
               {error && <p className="text-sm font-medium text-danger">{error}</p>}
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+                <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted">
                   Ubicación en el mapa
                 </p>
                 <LocationMap

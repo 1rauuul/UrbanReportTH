@@ -23,7 +23,7 @@ export default function StarRating({ value = 0, onChange, size = "lg" }: StarRat
             className={[
               sizeClass,
               "transition-transform hover:scale-110 focus:outline-none",
-              filled ? "text-warning" : "text-gray-300",
+              filled ? "text-warning" : "text-muted/30",
             ].join(" ")}
             onClick={() => onChange?.(star)}
             onMouseEnter={() => setHovered(star)}

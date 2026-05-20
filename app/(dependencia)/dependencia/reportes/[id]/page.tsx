@@ -198,7 +198,7 @@ export default function DependenciaReportePage({ params }: Props) {
                   : "Asignar a jefe de cuadrilla"}
               </h2>
               {reporte.estatus === "reabierto_por_ciudadano" && (
-                <div className="mb-3 rounded bg-red-50 p-3 text-sm text-red-700">
+                <div className="mb-3 rounded bg-primary/10 p-3 text-sm text-primary">
                   El ciudadano indicó que el problema no fue resuelto. Asigna nuevamente para revisión.
                 </div>
               )}

@@ -1,17 +1,17 @@
 import Link from "next/link";
-import GovShield from "@/components/branding/GovShield";
+
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 
 export default function Home() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <header className="border-b border-black/10 bg-header-bar shadow-sm">
+      <header className="border-b border-primary-dark/40 bg-header-bar shadow-sm">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4 text-white sm:px-8">
           <h1 className="text-xs font-semibold uppercase tracking-widest sm:text-sm">
             Reporte ciudadano
           </h1>
-          <GovShield variant="onDark" className="h-11 w-11 shrink-0 sm:h-12 sm:w-12" />
+          <img src="/favicon.png" alt="Logo" className="h-11 w-11 shrink-0 rounded sm:h-12 sm:w-12" />
         </div>
       </header>
 

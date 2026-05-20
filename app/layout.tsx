@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   title: "UrbaReport Tehuacán",
   description: "Reporta incidencias urbanas en tu ciudad",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
   appleWebApp: {
     capable: true,
     title: "UrbaReport",
@@ -25,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#691c32",
+  themeColor: "#9b2247",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

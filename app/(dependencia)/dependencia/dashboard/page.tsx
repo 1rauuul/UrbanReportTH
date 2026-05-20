@@ -107,7 +107,7 @@ export default function DependenciaDashboardPage() {
           <p className="text-base text-muted">
             {filtrados.length} de {reportes.length} reportes
             {reabiertos > 0 && (
-              <span className="ml-2 font-semibold text-red-600">
+              <span className="ml-2 font-semibold text-primary">
                 · {reabiertos} reabiertos
               </span>
             )}
@@ -195,8 +195,8 @@ export default function DependenciaDashboardPage() {
                   <tr
                     key={r.id}
                     className={[
-                      "border-b border-border/60 hover:bg-gray-50",
-                      r.estatus === "reabierto_por_ciudadano" ? "bg-red-50" : "",
+                      "border-b border-border/60 hover:bg-muted/10",
+                      r.estatus === "reabierto_por_ciudadano" ? "bg-primary/10" : "",
                     ].join(" ")}
                   >
                     <td className="px-3 py-3 font-bold text-primary">{r.folio}</td>

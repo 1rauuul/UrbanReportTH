@@ -79,7 +79,7 @@ export default function MetricasPage() {
           </section>
 
           <section className="grid gap-4 md:grid-cols-2">
-            <Card className="flex h-56 flex-col items-center justify-center bg-gray-50">
+            <Card className="flex h-56 flex-col items-center justify-center bg-muted/10">
               <p className="text-base font-bold text-muted">Reportes por estatus</p>
               <section className="mt-4 flex h-32 w-full items-end justify-around gap-2 px-4">
                 {data.porEstatus.map((e) => {
@@ -97,7 +97,7 @@ export default function MetricasPage() {
               </section>
             </Card>
 
-            <Card className="flex h-56 flex-col items-center justify-center bg-gray-50">
+            <Card className="flex h-56 flex-col items-center justify-center bg-muted/10">
               <p className="text-base font-bold text-muted">Distribución por tipo</p>
               <section className="mt-4 flex flex-wrap justify-center gap-4">
                 {data.porTipo.map((t) => (

@@ -37,7 +37,7 @@ export default function SyncStatusBanner() {
     <div
       className={[
         "border-b px-4 py-2 text-center text-xs font-semibold sm:text-sm",
-        online ? "border-warning/30 bg-warning/10 text-[#7a5610]" : "border-danger/30 bg-danger/10 text-danger",
+        online ? "border-warning/30 bg-warning/10 text-warning" : "border-danger/30 bg-danger/10 text-danger",
       ].join(" ")}
       role="status"
     >

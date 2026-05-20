@@ -4,15 +4,15 @@
   "description": "Reporta incidencias urbanas en Tehuacán",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f5f3f0",
-  "theme_color": "#691c32",
+  "background_color": "#f4f4f5",
+  "theme_color": "#9b2247",
   "lang": "es-MX",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/globe.svg",
+      "src": "/favicon.png",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     }
   ]

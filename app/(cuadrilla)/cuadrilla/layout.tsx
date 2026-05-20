@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import GovShield from "@/components/branding/GovShield";
+
 
 export default function CuadrillaLayout({
   children,
@@ -13,12 +13,12 @@ export default function CuadrillaLayout({
 
   return (
     <div className="min-h-dvh bg-background">
-      <header className="border-b border-black/10 bg-header-bar text-white shadow-sm">
+      <header className="border-b border-primary-dark/40 bg-header-bar text-white shadow-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3 md:px-8">
           <h1 className="text-[10px] font-semibold uppercase tracking-widest sm:text-xs">
             Cuadrilla · UrbaReport
           </h1>
-          <GovShield variant="onDark" className="h-9 w-9 shrink-0" />
+          <img src="/favicon.png" alt="Logo" className="h-9 w-9 shrink-0 rounded" />
         </div>
       </header>
       <div className="border-b border-border bg-white px-4 py-2 shadow-sm md:px-8">

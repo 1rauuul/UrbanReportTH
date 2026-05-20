@@ -49,7 +49,7 @@ export default function OtpDisplayModal({
           </p>
         </div>
 
-        <p className="rounded bg-amber-50 px-3 py-2 text-center text-[11px] leading-relaxed text-amber-800">
+        <p className="rounded bg-warning/10 px-3 py-2 text-center text-[11px] leading-relaxed text-warning">
           En producción este código se enviaría por SMS o WhatsApp.
           Solo se muestra aquí para el demo del MVP.
         </p>

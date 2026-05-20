@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { SVGProps } from "react";
-import GovShield from "@/components/branding/GovShield";
+
 
 function IconBandeja(props: SVGProps<SVGSVGElement>) {
   return (
@@ -35,7 +35,7 @@ export default function SidebarGobierno() {
         <span className="text-[10px] font-semibold uppercase leading-tight tracking-wide">
           UrbaReport
         </span>
-        <GovShield variant="onDark" className="h-8 w-8 shrink-0" />
+        <img src="/favicon.png" alt="Logo" className="h-8 w-8 shrink-0 rounded" />
       </div>
       <div className="border-b border-border px-3 py-3">
         <p className="text-xs font-semibold text-primary">Mesa de control</p>

@@ -62,7 +62,7 @@ async function exportarPDF(
     body: rows,
     startY: 18,
     styles: { fontSize: 7, cellPadding: 1.5 },
-    headStyles: { fillColor: [105, 28, 50] },
+    headStyles: { fillColor: [155, 34, 71] },
     margin: { top: 18 },
   });
 
@@ -154,9 +154,9 @@ export default function GobiernoDashboardPage() {
   const statCards = [
     { label: "Total", value: String(stats.total), color: "text-primary" },
     { label: "Pendientes", value: String(stats.pendientes), color: "text-warning" },
-    { label: "En proceso", value: String(stats.enProceso), color: "text-indigo-600" },
+    { label: "En proceso", value: String(stats.enProceso), color: "text-primary" },
     { label: "Resueltos", value: String(stats.resueltos), color: "text-success" },
-    { label: "Reabiertos", value: String(stats.pendienteRevision), color: "text-red-600" },
+    { label: "Reabiertos", value: String(stats.pendienteRevision), color: "text-primary" },
   ];
 
   async function handleExportar(formato: "csv" | "excel" | "pdf") {
@@ -232,12 +232,12 @@ export default function GobiernoDashboardPage() {
           onClick={() => setTab("reabiertos")}
           className={[
             "rounded-lg px-4 py-2 text-sm font-bold",
-            tab === "reabiertos" ? "bg-red-600 text-white" : "border border-border bg-white text-text",
+            tab === "reabiertos" ? "bg-primary text-white" : "border border-border bg-white text-text",
           ].join(" ")}
         >
           Reabiertos por ciudadano
           {reabiertos.length > 0 && (
-            <span className="ml-2 rounded-full bg-red-100 px-1.5 py-0.5 text-xs text-red-700">
+            <span className="ml-2 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
               {reabiertos.length}
             </span>
           )}
@@ -408,7 +408,7 @@ export default function GobiernoDashboardPage() {
             {filtrados.map((r) => {
               const tipo = TIPOS_INCIDENCIA.find((t) => t.id === r.tipo);
               return (
-                <tr key={r.id} className="border-b border-border/60 hover:bg-gray-50">
+                <tr key={r.id} className="border-b border-border/60 hover:bg-muted/10">
                   <td className="px-3 py-3 font-bold text-primary">{r.folio}</td>
                   <td className="px-3 py-3">
                     <span className="flex items-center gap-1.5">

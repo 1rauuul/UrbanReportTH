@@ -110,7 +110,7 @@ export default function CuadrillaDashboardPage() {
               {reportes.map((r) => {
                 const t = TIPOS_INCIDENCIA.find((x) => x.id === r.tipo);
                 return (
-                  <tr key={r.id} className="border-b border-border/60 hover:bg-gray-50">
+                  <tr key={r.id} className="border-b border-border/60 hover:bg-muted/10">
                     <td className="px-3 py-3 font-bold text-primary">{r.folio}</td>
                     <td className="px-3 py-3">
                       <span className="flex items-center gap-1.5">

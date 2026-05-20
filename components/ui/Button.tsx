@@ -9,15 +9,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-primary text-white hover:bg-primary-dark active:bg-primary-dark",
+    "bg-primary text-white hover:bg-primary-dark active:bg-primary-dark focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
   secondary:
-    "bg-white text-primary border-2 border-primary hover:bg-primary/5",
+    "bg-white text-primary border-2 border-primary hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40",
   accent:
-    "bg-accent text-white hover:bg-accent-dark active:bg-accent-dark",
+    "bg-warning text-white hover:bg-warning/80 active:bg-warning/80 focus-visible:ring-2 focus-visible:ring-warning/40 focus-visible:ring-offset-2",
   danger:
-    "bg-danger text-white hover:bg-[#a32224]",
+    "bg-primary text-white hover:bg-primary-dark active:bg-primary-dark focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
   ghost:
-    "bg-transparent text-primary hover:bg-primary/10",
+    "bg-transparent text-primary hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-primary/20",
 };
 
 export default function Button({
@@ -30,8 +30,8 @@ export default function Button({
   return (
     <button
       className={[
-        "inline-flex min-h-11 items-center justify-center rounded px-5 text-base font-semibold transition-colors",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-12 items-center justify-center rounded px-6 text-base font-bold transition-colors",
+        "focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
         variants[variant],
         fullWidth ? "w-full" : "",
         className,

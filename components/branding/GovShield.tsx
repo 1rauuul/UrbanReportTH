@@ -6,9 +6,9 @@ export default function GovShield({
   className?: string;
   variant?: "default" | "onDark";
 }) {
-  const fill = variant === "onDark" ? "#ffffff" : "#691C32";
-  const stroke = variant === "onDark" ? "rgba(255,255,255,0.4)" : "#4A1424";
-  const cross = variant === "onDark" ? "#f5e6b8" : "#C89520";
+  const fill = variant === "onDark" ? "#ffffff" : "#9b2247";
+  const stroke = variant === "onDark" ? "rgba(255,255,255,0.4)" : "#611232";
+  const cross = variant === "onDark" ? "#a57f2c" : "#a57f2c";
 
   return (
     <svg
