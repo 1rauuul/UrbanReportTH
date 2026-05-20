@@ -35,6 +35,8 @@ export default function NuevoReportePage() {
   const [ubicacion, setUbicacion] = useState<MapLocation | null>(null);
   const [foto, setFoto] = useState<Blob | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [preVerificacion, setPreVerificacion] = useState<"verificada" | "con_dudas" | "no_corresponde" | null>(null);
+  const [analizando, setAnalizando] = useState(false);
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
 
@@ -221,8 +223,44 @@ export default function NuevoReportePage() {
                     onChange={(blob, preview) => {
                       setFoto(blob);
                       setFotoPreview(preview);
+                      setPreVerificacion(null);
+                      if (blob && tipo && online) {
+                        setAnalizando(true);
+                        const fd = new FormData();
+                        fd.append("foto", blob, "evidencia.jpg");
+                        fd.append("tipo", tipo);
+                        fetch("/api/analizar-foto", { method: "POST", body: fd })
+                          .then((r) => r.json())
+                          .then((data: { verificacion: typeof preVerificacion }) => {
+                            setPreVerificacion(data.verificacion ?? null);
+                          })
+                          .catch(() => setPreVerificacion(null))
+                          .finally(() => setAnalizando(false));
+                      }
                     }}
                   />
+                  {analizando && (
+                    <p className="flex items-center gap-2 text-sm text-muted">
+                      <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      Analizando imagen con IA...
+                    </p>
+                  )}
+                  {!analizando && preVerificacion && (
+                    <div
+                      className={[
+                        "rounded px-3 py-2 text-xs font-semibold",
+                        preVerificacion === "verificada"
+                          ? "bg-success/10 text-success"
+                          : preVerificacion === "con_dudas"
+                            ? "bg-yellow-50 text-yellow-700"
+                            : "bg-danger/10 text-danger",
+                      ].join(" ")}
+                    >
+                      {preVerificacion === "verificada" && "IA: Imagen verificada — la foto corresponde al tipo de reporte."}
+                      {preVerificacion === "con_dudas" && "IA: La imagen genera dudas — intenta con una foto más clara del problema."}
+                      {preVerificacion === "no_corresponde" && "IA: La imagen no parece corresponder al problema reportado."}
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="rounded-lg border border-input-border bg-input-soft px-4 py-3">
