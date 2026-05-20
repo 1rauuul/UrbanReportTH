@@ -132,6 +132,20 @@ export default function DetalleReportePage({ params }: Props) {
             </div>
           )}
 
+          {reporte.fotoAvance && (
+            <div className="mt-4 overflow-hidden rounded border border-input-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={reporte.fotoAvance}
+                alt="Evidencia de avance"
+                className="h-36 w-full object-cover"
+              />
+              <div className="flex items-center gap-1.5 bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
+                Foto de avance (cuadrilla)
+              </div>
+            </div>
+          )}
+
           <Card variant="default" padding="md" className="mt-4">
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">
               Descripción

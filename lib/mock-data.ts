@@ -41,6 +41,7 @@ export interface Reporte {
   lng?: number | null;
   fotoUrl?: string | null;
   fotoVerificacion?: "verificada" | "con_dudas" | "no_corresponde" | null;
+  fotoAvance?: string | null;
   syncStatus?: SyncStatus;
   clientRequestId?: string;
   lastError?: string;
