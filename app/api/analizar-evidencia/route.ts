@@ -16,11 +16,17 @@ interface AnalysisResult {
 
 const BACHE_NEGATIVE = new Set([
   "pothole", "crack", "damage", "hole", "broken", "uneven",
-  "bache", "grieta", "roto", "hundido", "desnivel",
+  "depression", "crater", "erosion", "deterioration", "rut",
+  "fissure", "pit", "dent", "hazard", "rough", "worn",
+  "bache", "grieta", "roto", "hundido", "desnivel", "agrietado",
+  "deterioro", "hoyo", "zanja", "hundimiento", "fisura",
 ]);
 const BACHE_RELEVANT = new Set([
   "road", "asphalt", "street", "pavement", "ground", "concrete",
+  "tarmac", "infrastructure", "road surface", "lane", "highway",
+  "parking", "alley", "driveway", "sidewalk",
   "calle", "carretera", "pavimento", "asfalto", "suelo",
+  "via", "banqueta", "camino",
 ]);
 
 const BASURA_LABELS = new Set([
@@ -43,16 +49,16 @@ function analyzeBache(labels: LabelsResult[]): AnalysisResult {
   let riesgo: string;
   let recomendacion: string;
 
-  if (negativeScore > 1.5 || (negativeScore > 0.7 && relevantScore > 1)) {
+  if (negativeScore > 0.9 || (negativeScore > 0.5 && relevantScore > 0.7)) {
     severidad = "alto";
-    descripcion = "Se identificaron daños significativos en el pavimento. El bache parece profundo y extenso.";
-    riesgo = "Alto riesgo de daños a vehículos, accidentes viales y lesiones a peatones.";
-    recomendacion = "Se recomienda intervención urgente de Obra Pública. Señalizar la zona mientras se atiende.";
-  } else if (negativeScore > 0.4 || relevantScore > 1.5) {
+    descripcion = "Se identificaron danos significativos en el pavimento. El bache parece profundo y extenso.";
+    riesgo = "Alto riesgo de danos a vehiculos, accidentes viales y lesiones a peatones.";
+    recomendacion = "Se recomienda intervencion urgente de Obra Publica. Senalizar la zona mientras se atiende.";
+  } else if (negativeScore > 0.25 || relevantScore > 0.9) {
     severidad = "medio";
     descripcion = "Se detectaron irregularidades en el pavimento. El bache es visible pero moderado.";
-    riesgo = "Riesgo moderado de daños menores a neumáticos y suspensión de vehículos.";
-    recomendacion = "Programar reparación en los próximos 7 días. Colocar conos preventivos.";
+    riesgo = "Riesgo moderado de danos menores a neumaticos y suspension de vehiculos.";
+    recomendacion = "Programar reparacion en los proximos 7 dias. Colocar conos preventivos.";
   } else {
     severidad = "bajo";
     descripcion = "Se observan imperfecciones leves en la superficie. No se detecta un bache profundo.";
@@ -125,7 +131,7 @@ export async function POST(req: NextRequest) {
             {
               image: { content: base64 },
               features: [
-                { type: "LABEL_DETECTION", maxResults: 15 },
+                { type: "LABEL_DETECTION", maxResults: 25 },
                 { type: "OBJECT_LOCALIZATION", maxResults: 10 },
               ],
             },
@@ -157,7 +163,7 @@ export async function POST(req: NextRequest) {
         .filter((l) => BACHE_RELEVANT.has(l.description.toLowerCase()))
         .reduce((sum, l) => sum + l.score, 0);
 
-      if (negativeScore < 0.2 && relevantScore < 0.5) {
+      if (negativeScore < 0.15 && relevantScore < 0.35) {
         return NextResponse.json(
           {
             rechazada: true,
