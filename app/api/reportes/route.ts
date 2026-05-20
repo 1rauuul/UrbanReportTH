@@ -116,7 +116,8 @@ export async function POST(req: NextRequest) {
     let fotoVerificacion: string | null = null;
     if (foto instanceof File && foto.size > 0) {
       fotoUrl = await saveUpload(foto);
-      if (tipo === "bache" || tipo === "basura") {
+      const skipAI = form.get("skipAI") === "1";
+      if (!skipAI && (tipo === "bache" || tipo === "basura")) {
         try {
           fotoVerificacion = await verificarImagenConVision(foto, tipo);
         } catch (e) {

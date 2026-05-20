@@ -128,6 +128,7 @@ async function uploadOne(pending: PendingReport): Promise<void> {
     ciudadanoNombre: pending.ciudadanoNombre,
     ciudadanoTelefono: pending.ciudadanoTelefono,
     foto,
+    skipAI: true,
   });
 
   await offlineDb.pendingReports.delete(pending.clientRequestId);

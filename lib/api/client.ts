@@ -36,6 +36,7 @@ export interface CreateReportePayload {
   ciudadanoNombre: string;
   ciudadanoTelefono: string;
   foto?: Blob | null;
+  skipAI?: boolean;
 }
 
 export async function createReporteApi(
@@ -54,6 +55,7 @@ export async function createReporteApi(
   if (payload.lat != null) form.append("lat", String(payload.lat));
   if (payload.lng != null) form.append("lng", String(payload.lng));
   if (payload.foto) form.append("foto", payload.foto, "evidencia.jpg");
+  if (payload.skipAI) form.append("skipAI", "1");
 
   const res = await fetch("/api/reportes", { method: "POST", body: form });
   if (!res.ok) {
