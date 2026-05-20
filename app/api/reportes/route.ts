@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { toReporteDTO } from "@/lib/api/mappers";
 import { nextFolio } from "@/lib/api/folio-server";
 import { saveUpload } from "@/lib/server/upload";
+import { verificarImagenConVision } from "@/lib/server/vision";
 import { normalizarTelefono, slugDependencia, nombreDependencia } from "@/lib/utils";
 import { getSession, getStaffSession } from "@/lib/server/session";
 import type { TipoIncidencia } from "@/lib/mock-data";
@@ -110,8 +111,16 @@ export async function POST(req: NextRequest) {
     if (existing) return NextResponse.json(toReporteDTO(existing));
 
     let fotoUrl: string | null = null;
+    let fotoVerificacion: string | null = null;
     if (foto instanceof File && foto.size > 0) {
       fotoUrl = await saveUpload(foto);
+      if (tipo === "bache" || tipo === "basura") {
+        try {
+          fotoVerificacion = await verificarImagenConVision(foto, tipo);
+        } catch (e) {
+          console.warn("[vision] Análisis omitido:", (e as Error).message);
+        }
+      }
     }
 
     const ciudadano =
@@ -155,6 +164,7 @@ export async function POST(req: NextRequest) {
         ciudadanoId: ciudadano.id,
         ciudadanoNombre: ciudadanoNombre || ciudadano.nombre,
         fotoUrl,
+        fotoVerificacion,
         historial: {
           create: {
             estatus: "asignado_a_dependencia",

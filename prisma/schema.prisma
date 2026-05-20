@@ -81,6 +81,7 @@ model Reporte {
   ciudadano        Ciudadano           @relation(fields: [ciudadanoId], references: [id])
   ciudadanoNombre  String
   fotoUrl          String?
+  fotoVerificacion String?
   createdAt        DateTime            @default(now())
   historial        HistorialEstatus[]
   evaluacion       Evaluacion?

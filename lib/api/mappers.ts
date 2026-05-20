@@ -33,6 +33,7 @@ export function toReporteDTO(r: ReporteWithRelations): ReporteDTO {
     fecha: r.createdAt.toISOString().slice(0, 10),
     ciudadano: r.ciudadanoNombre,
     fotoUrl: r.fotoUrl,
+    fotoVerificacion: (r.fotoVerificacion as "verificada" | "con_dudas" | "no_corresponde" | null) ?? null,
     syncStatus: "synced",
     clientRequestId: r.clientRequestId,
     jefeCuadrillaId: r.asignacion?.jefeCuadrillaId ?? null,

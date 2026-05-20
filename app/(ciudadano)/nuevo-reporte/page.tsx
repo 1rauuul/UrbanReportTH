@@ -94,10 +94,14 @@ export default function NuevoReportePage() {
     }
   }
 
+  const requiereFoto = tipo === "bache" || tipo === "basura";
+
   const panelTitles = [
     "Selecciona el tipo de incidencia.",
     "Describe el problema y su ubicación.",
-    "Agrega evidencia fotográfica (opcional).",
+    requiereFoto
+      ? "Agrega evidencia fotográfica (requerida para IA)."
+      : "Revisa tu reporte antes de enviarlo.",
   ];
 
   return (
@@ -204,19 +208,29 @@ export default function NuevoReportePage() {
 
           {step === 2 && (
             <div className="mt-4 flex flex-col gap-5">
-              <p className="text-sm text-muted">
-                {!online
-                  ? "Sin conexión: el reporte se guardará localmente y se enviará automáticamente al reconectar."
-                  : "Una foto ayuda a la dependencia a identificar el problema."}
-              </p>
-              <PhotoUpload
-                value={foto}
-                previewUrl={fotoPreview}
-                onChange={(blob, preview) => {
-                  setFoto(blob);
-                  setFotoPreview(preview);
-                }}
-              />
+              {requiereFoto ? (
+                <>
+                  <p className="text-sm text-muted">
+                    {!online
+                      ? "Sin conexión: el reporte se guardará localmente y se enviará automáticamente al reconectar."
+                      : "La foto será analizada por IA para verificar que corresponde al problema reportado."}
+                  </p>
+                  <PhotoUpload
+                    value={foto}
+                    previewUrl={fotoPreview}
+                    onChange={(blob, preview) => {
+                      setFoto(blob);
+                      setFotoPreview(preview);
+                    }}
+                  />
+                </>
+              ) : (
+                <div className="rounded-lg border border-input-border bg-input-soft px-4 py-3">
+                  <p className="text-sm text-muted">
+                    Para este tipo de reporte no se requiere evidencia fotográfica.
+                  </p>
+                </div>
+              )}
               {error && <p className="text-sm font-medium text-danger">{error}</p>}
               <div className="flex gap-3">
                 <Button variant="secondary" className="flex-1" onClick={() => setStep(1)}>

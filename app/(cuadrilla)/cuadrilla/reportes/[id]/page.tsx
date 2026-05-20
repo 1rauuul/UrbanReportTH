@@ -137,6 +137,22 @@ export default function CuadrillaReportePage({ params }: Props) {
                   alt="Evidencia ciudadano"
                   className="h-36 w-full object-cover"
                 />
+                {reporte.fotoVerificacion && (
+                  <div
+                    className={[
+                      "flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold",
+                      reporte.fotoVerificacion === "verificada"
+                        ? "bg-success/10 text-success"
+                        : reporte.fotoVerificacion === "con_dudas"
+                          ? "bg-yellow-50 text-yellow-700"
+                          : "bg-danger/10 text-danger",
+                    ].join(" ")}
+                  >
+                    {reporte.fotoVerificacion === "verificada" && "IA: Imagen verificada"}
+                    {reporte.fotoVerificacion === "con_dudas" && "IA: Imagen con dudas"}
+                    {reporte.fotoVerificacion === "no_corresponde" && "IA: No corresponde al tipo de reporte"}
+                  </div>
+                )}
               </div>
             )}
           </Card>
