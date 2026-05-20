@@ -7,6 +7,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import IncidenciaIcon from "@/components/ui/IncidenciaIcon";
+import PhotoUpload from "@/components/ui/PhotoUpload";
 import { ESTATUS_LABELS, TIPOS_INCIDENCIA } from "@/lib/mock-data";
 import { fetchAllReportes, avanceCuadrillaApi } from "@/lib/api/client";
 import type { ReporteDTO } from "@/lib/api/types";
@@ -23,6 +24,8 @@ export default function CuadrillaReportePage({ params }: Props) {
   const [historial, setHistorial] = useState<{ estatus: string; nota: string; fecha: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [nota, setNota] = useState("");
+  const [fotoAvance, setFotoAvance] = useState<Blob | null>(null);
+  const [fotoAvancePreview, setFotoAvancePreview] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
 
@@ -85,7 +88,7 @@ export default function CuadrillaReportePage({ params }: Props) {
     setGuardando(true);
     setError("");
     try {
-      const updated = await avanceCuadrillaApi(id, nuevoEstatus, nota);
+      const updated = await avanceCuadrillaApi(id, nuevoEstatus, nota, fotoAvance);
       setReporte(updated);
       if (nuevoEstatus === "solucionado_por_cuadrilla") {
         setTimeout(() => router.push("/cuadrilla/dashboard"), 1200);
@@ -155,6 +158,19 @@ export default function CuadrillaReportePage({ params }: Props) {
                 )}
               </div>
             )}
+            {reporte.fotoAvance && (
+              <div className="mt-4 overflow-hidden rounded border border-input-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={reporte.fotoAvance}
+                  alt="Evidencia de avance"
+                  className="h-36 w-full object-cover"
+                />
+                <div className="flex items-center gap-1.5 bg-success/10 px-3 py-1.5 text-xs font-semibold text-success">
+                  Foto de avance (cuadrilla)
+                </div>
+              </div>
+            )}
           </Card>
 
           <Card>
@@ -199,6 +215,14 @@ export default function CuadrillaReportePage({ params }: Props) {
                   placeholder="Describe el avance o la acción realizada..."
                   value={nota}
                   onChange={(e) => setNota(e.target.value)}
+                />
+                <PhotoUpload
+                  value={fotoAvance}
+                  previewUrl={fotoAvancePreview}
+                  onChange={(blob, preview) => {
+                    setFotoAvance(blob);
+                    setFotoAvancePreview(preview);
+                  }}
                 />
                 {error && <p className="mb-2 text-sm text-danger">{error}</p>}
                 <div className="flex flex-col gap-3">

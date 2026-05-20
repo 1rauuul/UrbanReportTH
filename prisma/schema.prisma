@@ -82,6 +82,7 @@ model Reporte {
   ciudadanoNombre  String
   fotoUrl          String?
   fotoVerificacion String?
+  fotoAvance       String?
   createdAt        DateTime            @default(now())
   historial        HistorialEstatus[]
   evaluacion       Evaluacion?

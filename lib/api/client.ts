@@ -94,13 +94,18 @@ export async function asignarCuadrillaApi(
 export async function avanceCuadrillaApi(
   id: string,
   estatus: "en_proceso" | "solucionado_por_cuadrilla",
-  nota: string
+  nota: string,
+  fotoAvance?: Blob | null
 ): Promise<ReporteDTO> {
+  const form = new FormData();
+  form.append("estatus", estatus);
+  form.append("nota", nota || "");
+  if (fotoAvance) form.append("fotoAvance", fotoAvance, "avance.jpg");
+
   const res = await fetch(`/api/reportes/${id}/avance`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
-    body: JSON.stringify({ estatus, nota }),
+    body: form,
   });
   if (!res.ok) {
     const data = (await res.json().catch(() => ({}))) as { error?: string };

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { toReporteDTO } from "@/lib/api/mappers";
 import { getStaffSession } from "@/lib/server/session";
+import { saveUpload } from "@/lib/server/upload";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -17,9 +18,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
-  const body = await req.json();
-  const nuevoEstatus = body.estatus as EstadoAvance;
-  const nota = String(body.nota ?? "").trim() || `Actualizado a ${nuevoEstatus}.`;
+  const form = await req.formData();
+  const nuevoEstatus = form.get("estatus") as EstadoAvance;
+  const nota =
+    String(form.get("nota") ?? "").trim() || `Actualizado a ${nuevoEstatus}.`;
+  const fotoAvanceFile = form.get("fotoAvance");
 
   if (!AVANCES_VALIDOS.includes(nuevoEstatus)) {
     return NextResponse.json({ error: "Estatus inválido" }, { status: 400 });
@@ -52,6 +55,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       : nuevoEstatus;
 
   const updated = await prisma.$transaction(async (tx) => {
+    let fotoAvanceUrl: string | null = null;
+    if (fotoAvanceFile instanceof File && fotoAvanceFile.size > 0) {
+      fotoAvanceUrl = await saveUpload(fotoAvanceFile);
+    }
+
     await tx.historialEstatus.create({
       data: {
         reporteId: id,
@@ -74,9 +82,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       });
     }
 
+    const updateData: Record<string, unknown> = { estatus: estatusFinal };
+    if (fotoAvanceUrl) updateData.fotoAvance = fotoAvanceUrl;
+
     return tx.reporte.update({
       where: { id },
-      data: { estatus: estatusFinal },
+      data: updateData,
       include: { asignacion: true },
     });
   });

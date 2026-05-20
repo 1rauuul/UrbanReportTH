@@ -34,6 +34,7 @@ export function toReporteDTO(r: ReporteWithRelations): ReporteDTO {
     ciudadano: r.ciudadanoNombre,
     fotoUrl: r.fotoUrl,
     fotoVerificacion: (r.fotoVerificacion as "verificada" | "con_dudas" | "no_corresponde" | null) ?? null,
+    fotoAvance: r.fotoAvance ?? null,
     syncStatus: "synced",
     clientRequestId: r.clientRequestId,
     jefeCuadrillaId: r.asignacion?.jefeCuadrillaId ?? null,

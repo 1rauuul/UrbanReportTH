@@ -23,6 +23,7 @@ export interface ReporteDTO {
   ciudadano: string;
   fotoUrl?: string | null;
   fotoVerificacion?: "verificada" | "con_dudas" | "no_corresponde" | null;
+  fotoAvance?: string | null;
   syncStatus?: SyncStatus;
   clientRequestId?: string;
   jefeCuadrillaId?: string | null;
