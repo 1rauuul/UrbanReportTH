@@ -1,6 +1,6 @@
 {
-  "name": "UrbaReport Tehuacán",
-  "short_name": "UrbaReport",
+  "name": "SIMAC Tehuacan",
+  "short_name": "SIMAC",
   "description": "Reporta incidencias urbanas en Tehuacán",
   "start_url": "/",
   "display": "standalone",

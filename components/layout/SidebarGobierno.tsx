@@ -33,7 +33,7 @@ export default function SidebarGobierno() {
     <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface md:flex">
       <div className="flex items-center justify-between gap-2 border-b border-border bg-header-bar px-3 py-3 text-white">
         <span className="text-[10px] font-semibold uppercase leading-tight tracking-wide">
-          UrbaReport
+          SIMAC
         </span>
         <img src="/favicon.png" alt="Logo" className="h-8 w-8 shrink-0 rounded" />
       </div>

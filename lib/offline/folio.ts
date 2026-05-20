@@ -1,4 +1,4 @@
-const PEND_KEY = "urbareport-pend-seq";
+const PEND_KEY = "simac-pend-seq";
 
 export function generarFolioPendiente(): string {
   if (typeof window === "undefined") {

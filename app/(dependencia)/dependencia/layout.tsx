@@ -16,7 +16,7 @@ export default function DependenciaLayout({
       <header className="border-b border-primary-dark/40 bg-header-bar text-white shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 md:px-8">
           <h1 className="text-[10px] font-semibold uppercase tracking-widest sm:text-xs">
-            Dependencia · UrbaReport
+            Dependencia · SIMAC
           </h1>
           <img src="/favicon.png" alt="Logo" className="h-9 w-9 shrink-0 rounded" />
         </div>

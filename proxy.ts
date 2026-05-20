@@ -13,7 +13,7 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/confirmacion");
 
   if (isCitizenRoute) {
-    const raw = request.cookies.get("urbareport_session")?.value;
+    const raw = request.cookies.get("simac_session")?.value;
     const session = parseSessionCookie(raw);
     if (!session) {
       const url = request.nextUrl.clone();
@@ -25,7 +25,7 @@ export function proxy(request: NextRequest) {
 
   // Rutas gobierno → rol MESA_CONTROL
   if (pathname.startsWith("/gobierno")) {
-    const raw = request.cookies.get("urbareport_staff_session")?.value;
+    const raw = request.cookies.get("simac_staff_session")?.value;
     const session = parseStaffSessionCookie(raw);
     if (!session || session.rol !== "MESA_CONTROL") {
       const url = request.nextUrl.clone();
@@ -38,7 +38,7 @@ export function proxy(request: NextRequest) {
 
   // Rutas dependencia → rol DEPENDENCIA
   if (pathname.startsWith("/dependencia")) {
-    const raw = request.cookies.get("urbareport_staff_session")?.value;
+    const raw = request.cookies.get("simac_staff_session")?.value;
     const session = parseStaffSessionCookie(raw);
     if (!session || session.rol !== "DEPENDENCIA") {
       const url = request.nextUrl.clone();
@@ -51,7 +51,7 @@ export function proxy(request: NextRequest) {
 
   // Rutas cuadrilla → rol JEFE_CUADRILLA
   if (pathname.startsWith("/cuadrilla")) {
-    const raw = request.cookies.get("urbareport_staff_session")?.value;
+    const raw = request.cookies.get("simac_staff_session")?.value;
     const session = parseStaffSessionCookie(raw);
     if (!session || session.rol !== "JEFE_CUADRILLA") {
       const url = request.nextUrl.clone();

@@ -14,7 +14,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "UrbaReport Tehuacán",
+  title: "SIMAC Tehuacan",
   description: "Reporta incidencias urbanas en tu ciudad",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    title: "UrbaReport",
+    title: "SIMAC",
     statusBarStyle: "default",
   },
 };

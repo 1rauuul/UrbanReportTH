@@ -240,7 +240,7 @@ export const useAppStore = create<AppState>()(
         }),
     }),
     {
-      name: "urbareport-session",
+      name: "simac-session",
       partialize: (s) => ({ ciudadano: s.ciudadano }),
     }
   )

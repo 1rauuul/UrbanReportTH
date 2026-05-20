@@ -81,7 +81,9 @@ export async function POST(req: NextRequest) {
     const tipoRaw = String(form.get("tipo") ?? "");
     const descripcion = String(form.get("descripcion") ?? "").trim();
     const referencia = String(form.get("referencia") ?? "").trim();
+    const calle = String(form.get("calle") ?? "").trim();
     const colonia = String(form.get("colonia") ?? "Sin especificar").trim();
+    const codigoPostal = String(form.get("codigoPostal") ?? "").trim();
     const ciudadanoNombre = String(form.get("ciudadanoNombre") ?? "").trim();
     const ciudadanoTelefono = normalizarTelefono(
       String(form.get("ciudadanoTelefono") ?? "")
@@ -144,7 +146,7 @@ export async function POST(req: NextRequest) {
     const folio = await nextFolio();
     const direccion =
       lat != null && lng != null
-        ? `${lat.toFixed(5)}, ${lng.toFixed(5)}`
+        ? `${calle || lat.toFixed(5)}, ${codigoPostal ? `C.P. ${codigoPostal}, ` : ""}${colonia}`
         : referencia;
 
     const reporte = await prisma.reporte.create({

@@ -19,7 +19,7 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
           <Card variant="panel" padding="lg">
             <h2 className="text-xl font-bold text-primary sm:text-2xl">
-              UrbaReport Tehuacán
+              SIMAC Tehuacan
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted sm:text-base">
               Canal oficial para reportar incidencias en vía pública y dar seguimiento a su atención.

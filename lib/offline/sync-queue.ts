@@ -37,7 +37,9 @@ export interface EnqueueInput {
   tipo: TipoIncidencia;
   descripcion: string;
   referencia: string;
+  calle: string;
   colonia: string;
+  codigoPostal: string;
   lat: number | null;
   lng: number | null;
   ciudadanoNombre: string;
@@ -63,7 +65,9 @@ export async function enqueueReport(input: EnqueueInput): Promise<{
     tipo: input.tipo,
     descripcion: input.descripcion,
     referencia: input.referencia,
+    calle: input.calle,
     colonia: input.colonia || "Sin especificar",
+    codigoPostal: input.codigoPostal || "",
     lat: input.lat,
     lng: input.lng,
     ciudadanoNombre: input.ciudadanoNombre,
@@ -116,7 +120,9 @@ async function uploadOne(pending: PendingReport): Promise<void> {
     tipo: pending.tipo,
     descripcion: pending.descripcion,
     referencia: pending.referencia,
+    calle: pending.calle,
     colonia: pending.colonia,
+    codigoPostal: pending.codigoPostal,
     lat: pending.lat,
     lng: pending.lng,
     ciudadanoNombre: pending.ciudadanoNombre,

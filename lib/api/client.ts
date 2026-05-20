@@ -28,7 +28,9 @@ export interface CreateReportePayload {
   tipo: TipoIncidencia;
   descripcion: string;
   referencia: string;
+  calle: string;
   colonia: string;
+  codigoPostal: string;
   lat?: number | null;
   lng?: number | null;
   ciudadanoNombre: string;
@@ -44,7 +46,9 @@ export async function createReporteApi(
   form.append("tipo", payload.tipo);
   form.append("descripcion", payload.descripcion);
   form.append("referencia", payload.referencia);
+  form.append("calle", payload.calle);
   form.append("colonia", payload.colonia);
+  form.append("codigoPostal", payload.codigoPostal);
   form.append("ciudadanoNombre", payload.ciudadanoNombre);
   form.append("ciudadanoTelefono", payload.ciudadanoTelefono);
   if (payload.lat != null) form.append("lat", String(payload.lat));

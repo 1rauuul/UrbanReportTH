@@ -1,8 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
-const CITIZEN_COOKIE = "urbareport_session";
-const STAFF_COOKIE = "urbareport_staff_session";
+const CITIZEN_COOKIE = "simac_session";
+const STAFF_COOKIE = "simac_staff_session";
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 días
 
 function sign(payload: string): string {

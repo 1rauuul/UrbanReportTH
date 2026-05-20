@@ -1,4 +1,4 @@
-const CACHE = "urbareport-v1";
+const CACHE = "simac-v1";
 const PRECACHE = ["/", "/login", "/mis-reportes", "/nuevo-reporte", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
@@ -35,9 +35,9 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  const data = event.data?.json() ?? { title: "UrbaReport", body: "Actualización de tu reporte" };
-  event.waitUntil(
-    self.registration.showNotification(data.title ?? "UrbaReport", {
+  const data = event.data?.json() ?? { title: "SIMAC", body: "Actualizacion de tu reporte" };
+
+    self.registration.showNotification(data.title ?? "SIMAC", {
       body: data.body ?? "",
       icon: "/globe.svg",
       badge: "/globe.svg",

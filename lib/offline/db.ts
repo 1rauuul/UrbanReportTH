@@ -17,7 +17,9 @@ export interface PendingReport {
   tipo: TipoIncidencia;
   descripcion: string;
   referencia: string;
+  calle: string;
   colonia: string;
+  codigoPostal: string;
   lat: number | null;
   lng: number | null;
   ciudadanoNombre: string;
@@ -33,7 +35,7 @@ class OfflineDB extends Dexie {
   pendingPhotos!: EntityTable<PendingPhoto, "id">;
 
   constructor() {
-    super("UrbaReportOffline");
+    super("SIMACOffline");
     this.version(1).stores({
       pendingReports: "clientRequestId, status, createdAt",
       pendingPhotos: "++id, pendingReportId",
